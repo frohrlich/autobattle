@@ -32,8 +32,8 @@ def main():
     player_pos = pg.Vector2(screen.get_width() / 4, screen.get_height() / 2)
     enemy_pos = pg.Vector2(screen.get_width() * 3 / 4, screen.get_height() / 2)
 
-    player = Character(spritesheet, (0, 3), player_pos, True, 10)
-    enemy = Character(spritesheet, (0, 0), enemy_pos, False, 10)
+    player = Character(spritesheet, (0, 3), player_pos, True, 100, 25, 10)
+    enemy = Character(spritesheet, (0, 0), enemy_pos, False, 100, 5, 10)
     character_list = (player, enemy)
     battle = Battle(character_list)
 
@@ -42,6 +42,7 @@ def main():
     clock = pg.time.Clock()
 
     going = True
+    ended = False
     while going:
         clock.tick(60)
         for event in pg.event.get():
@@ -50,42 +51,63 @@ def main():
             elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 sys.exit()
             elif event.type == pg.MOUSEBUTTONUP:
-                battle.next_turn()
+                # check if previous turn is properly finished
+                if not any(character.attacking for character in battle.character_list):
+                    battle.next_turn()
+        if any(character.is_dead() for character in battle.character_list):
+            if pg.font:
+                font = pg.font.Font(None, 64)
+                text_str = "Game Over" if player.is_dead() else "You Win!"
+                text = font.render(text_str, True, (255, 255, 255))
+                textpos = text.get_rect(centerx=background.get_width() / 2, y=10)
+                background.blit(text, textpos)
+            if not ended:
+                ended = True
+                pg.time.set_timer(pg.QUIT, 1000)
 
         character_group.update()
 
         screen.blit(background, (0, 0))
         character_group.draw(screen)
+        for character in character_list:
+            pg.draw.rect(
+                screen,
+                (255, 0, 0),
+                (
+                    character.rect.left,
+                    character.rect.top - 20,
+                    character.rect.width,
+                    10,
+                ),
+            )
+            pg.draw.rect(
+                screen,
+                (0, 128, 0),
+                (
+                    character.rect.left,
+                    character.rect.top - 20,
+                    character.rect.width
+                    * (1 - (character.max_hp - character.hp) / character.max_hp),
+                    10,
+                ),
+            )
         pg.display.flip()
 
     pg.quit()
 
 
-# def load_image(name, colorkey=None, scale=1):
-#     fullname = os.path.join(data_dir, name)
-#     image = pg.image.load(fullname)
-
-#     size = image.get_size()
-#     size = (size[0] * scale, size[1] * scale)
-#     image = pg.transform.scale(image, size)
-
-#     image = image.convert()
-#     if colorkey is not None:
-#         if colorkey == -1:
-#             colorkey = image.get_at((0, 0))
-#         image.set_colorkey(colorkey, pg.RLEACCEL)
-#     return image, image.get_rect()
-
-
 class Battle:
-    def __init__(self, characters):
-        self.characters = characters
+    def __init__(self, character_list):
+        self.character_list = character_list
         self.turn = 0
 
     def next_turn(self):
-        index = self.turn % len(self.characters)
-        current_character = self.characters[index]
-        current_character.attack()
+        index = self.turn % len(self.character_list)
+        next_index = (self.turn + 1) % len(self.character_list)
+        current_character = self.character_list[index]
+        target = self.character_list[next_index]
+
+        current_character.attack(target)
 
         self.turn += 1
 
@@ -95,11 +117,17 @@ class Character(pg.sprite.Sprite):
 
     animation_speed = 5
 
-    def __init__(self, spritesheet, base_sprite, position, face_right, scale=1):
+    def __init__(
+        self, spritesheet, base_sprite, position, face_right, max_hp, strength, scale=1
+    ):
         pg.sprite.Sprite.__init__(self)
+
         self.base_sprite = base_sprite
         self.spritesheet = spritesheet
         self.face_right = face_right
+        self.max_hp = max_hp
+        self.hp = max_hp
+        self.strength = strength
 
         # which sprite to use depending on character facing right or left
         if face_right:
@@ -125,8 +153,9 @@ class Character(pg.sprite.Sprite):
         if self.attacking:
             self.animate_attack()
 
-    def attack(self):
+    def attack(self, target):
         self.attacking = True
+        target.hp -= self.strength
 
     def animate_attack(self):
         """make character move towards enemy and then return to original position"""
@@ -153,6 +182,9 @@ class Character(pg.sprite.Sprite):
         else:
             self.returning = True
             self.rect.centerx -= direction * self.animation_speed
+
+    def is_dead(self):
+        return self.hp <= 0
 
 
 if __name__ == "__main__":
