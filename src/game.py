@@ -1,5 +1,6 @@
 import os
 import sys
+from enum import Enum
 
 import pygame as pg
 
@@ -29,11 +30,14 @@ def main():
     screen.blit(background, (0, 0))
     pg.display.flip()
 
-    player_pos = pg.Vector2(screen.get_width() / 4, screen.get_height() / 2)
-    enemy_pos = pg.Vector2(screen.get_width() * 3 / 4, screen.get_height() / 2)
+    trident = Item(spritesheet, (8, 9), ItemType.WEAPON, strength=5, hp=12)
+    anvil = Item(spritesheet, (9, 10), ItemType.WEAPON, strength=5, hp=4)
+    inventory = Inventory(trident, anvil)
 
-    player = Character(spritesheet, (0, 3), player_pos, True, 100, 25, 10)
-    enemy = Character(spritesheet, (0, 0), enemy_pos, False, 100, 5, 10)
+    player_pos = pg.Vector2(screen.get_width() / 8, screen.get_height() / 2)
+    enemy_pos = pg.Vector2(screen.get_width() * 3 / 8, screen.get_height() / 2)
+    player = Player(spritesheet, (0, 3), player_pos, True, 100, 5, 5, inventory)
+    enemy = Character(spritesheet, (0, 0), enemy_pos, False, 100, 5, 5)
     character_list = (player, enemy)
     battle = Battle(character_list)
 
@@ -52,14 +56,16 @@ def main():
                 sys.exit()
             elif event.type == pg.MOUSEBUTTONUP:
                 # check if previous turn is properly finished
-                if not any(character.attacking for character in battle.character_list):
+                if not ended and not any(
+                    character.attacking for character in battle.character_list
+                ):
                     battle.next_turn()
         if any(character.is_dead() for character in battle.character_list):
             if pg.font:
                 font = pg.font.Font(None, 64)
                 text_str = "Game Over" if player.is_dead() else "You Win!"
                 text = font.render(text_str, True, (255, 255, 255))
-                textpos = text.get_rect(centerx=background.get_width() / 2, y=10)
+                textpos = text.get_rect(centerx=background.get_width() / 4, y=10)
                 background.blit(text, textpos)
             if not ended:
                 ended = True
@@ -67,30 +73,24 @@ def main():
 
         character_group.update()
 
+        if pg.font:
+            font = pg.font.Font(None, 64)
+            text = font.render("Inventory", True, (200, 200, 200))
+            textpos = text.get_rect(centerx=background.get_width() * 3 / 4, y=10)
+            background.blit(text, textpos)
+
         screen.blit(background, (0, 0))
+        inventory.draw(screen)
+        pg.draw.line(
+            screen,
+            (200, 200, 200),
+            (screen.get_width() / 2, 0),
+            (screen.get_width() / 2, screen.get_height()),
+            5,
+        )
         character_group.draw(screen)
         for character in character_list:
-            pg.draw.rect(
-                screen,
-                (255, 0, 0),
-                (
-                    character.rect.left,
-                    character.rect.top - 20,
-                    character.rect.width,
-                    10,
-                ),
-            )
-            pg.draw.rect(
-                screen,
-                (0, 128, 0),
-                (
-                    character.rect.left,
-                    character.rect.top - 20,
-                    character.rect.width
-                    * (1 - (character.max_hp - character.hp) / character.max_hp),
-                    10,
-                ),
-            )
+            character.draw_health_bar(screen)
         pg.display.flip()
 
     pg.quit()
@@ -118,16 +118,23 @@ class Character(pg.sprite.Sprite):
     animation_speed = 5
 
     def __init__(
-        self, spritesheet, base_sprite, position, face_right, max_hp, strength, scale=1
+        self,
+        spritesheet,
+        base_sprite,
+        position,
+        face_right,
+        base_hp,
+        base_strength,
+        scale=1,
     ):
         pg.sprite.Sprite.__init__(self)
 
         self.base_sprite = base_sprite
         self.spritesheet = spritesheet
         self.face_right = face_right
-        self.max_hp = max_hp
-        self.hp = max_hp
-        self.strength = strength
+        self.max_hp = base_hp
+        self.hp = base_hp
+        self._strength = base_strength
 
         # which sprite to use depending on character facing right or left
         if face_right:
@@ -157,6 +164,10 @@ class Character(pg.sprite.Sprite):
         self.attacking = True
         target.hp -= self.strength
 
+    @property
+    def strength(self):
+        return self._strength
+
     def animate_attack(self):
         """make character move towards enemy and then return to original position"""
 
@@ -183,8 +194,115 @@ class Character(pg.sprite.Sprite):
             self.returning = True
             self.rect.centerx -= direction * self.animation_speed
 
+    def draw_health_bar(self, screen):
+        pg.draw.rect(
+            screen,
+            (255, 0, 0),
+            (
+                self.rect.left,
+                self.rect.top - 20,
+                self.rect.width,
+                10,
+            ),
+        )
+        pg.draw.rect(
+            screen,
+            (0, 128, 0),
+            (
+                self.rect.left,
+                self.rect.top - 20,
+                self.rect.width * (1 - (self.max_hp - self.hp) / self.max_hp),
+                10,
+            ),
+        )
+
     def is_dead(self):
         return self.hp <= 0
+
+
+class Player(Character):
+    def __init__(
+        self,
+        spritesheet,
+        base_sprite,
+        position,
+        face_right,
+        base_hp,
+        base_strength,
+        scale=1,
+        inventory=None,
+    ):
+        Character.__init__(
+            self,
+            spritesheet,
+            base_sprite,
+            position,
+            face_right,
+            base_hp,
+            base_strength,
+            scale,
+        )
+        self.items = []
+        self.inventory = inventory
+        if inventory:
+            self.max_hp = self.max_hp + sum((item.hp for item in self.inventory.items))
+            self.hp = self.max_hp
+
+    @property
+    def strength(self):
+        return self._strength + sum((item.strength for item in self.inventory.items))
+
+
+class Item:
+    """represents a wearable item with its bonuses"""
+
+    def __init__(self, spritesheet, sprite, item_type, strength=0, hp=0):
+        self.spritesheet = spritesheet
+        self.sprite = sprite
+        self.item_type = item_type
+        self.strength = strength
+        self.hp = hp
+
+    def get_image(self):
+        return self.spritesheet.image_at_index(self.sprite, -1)
+
+
+class ItemType(Enum):
+    WEAPON = 1
+
+
+class Inventory:
+    def __init__(self, *args):
+        self.items = list(args)
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def draw(self, screen):
+        for i, item in enumerate(self.items):
+            base_x = screen.get_width() / 2 + 20 + i * 70
+            base_y = 80
+            size = 60
+            image_size = 64
+            outer_rect = (base_x, base_y, size, size)
+            inner_rect = (
+                base_x + (size - image_size) / 2,
+                base_y + (size - image_size) / 2,
+                size - image_size,
+                size - image_size,
+            )
+            # outline
+            pg.draw.rect(
+                screen,
+                (100, 100, 100),
+                outer_rect,
+            )
+            # item image
+            image, rect = item.get_image()
+            size = image.get_size()
+            size = (size[0] * 4, size[1] * 4)
+            image = pg.transform.scale(image, size)
+            screen.blit(image, inner_rect)
 
 
 if __name__ == "__main__":
