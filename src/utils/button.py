@@ -31,7 +31,7 @@ class Button:
         self.rect = pg.Rect(0, 0, self.width, self.height)
         self.rect.center = (centerx, centery)
         font = pg.font.Font(dogica_path, 32)
-        self.text = font.render(text, True, (20, 20, 20))
+        self.text = font.render(text, True, (0, 0, 0))
 
     def process(self):
         mousePos = pg.mouse.get_pos()
