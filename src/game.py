@@ -11,7 +11,9 @@ from data.data import character_infos
 from inventory import Inventory
 from inventory import Item
 from inventory import Slot
+from utils.button import Button
 from utils.spritesheet import Spritesheet
+from utils.utils import NEXT_TURN_EVENT
 from utils.utils import dark_green
 from utils.utils import dogica_path
 from utils.utils import img_dir
@@ -37,6 +39,7 @@ def main():
     battle_index = 0
     current_enemy = create_enemy(screen, spritesheet, enemy_types[battle_index])
     battle = Battle([player, current_enemy])
+    start_battle_button = create_start_battle_button(screen, battle)
 
     # start main game loop
     clock = pg.time.Clock()
@@ -50,27 +53,31 @@ def main():
             elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 sys.exit()
             elif event.type == pg.MOUSEBUTTONUP:
+                if not battle.is_started:
+                    start_battle_button.click(event.pos)
                 inventory.drop_dragged_item(event.pos)
             elif event.type == pg.MOUSEBUTTONDOWN:
-                # if click on battle side of screen, go to next turn
-                if is_on_battle_side(event.pos, background):
-                    if not ended and battle.is_previous_turn_finished():
-                        battle.next_turn()
-                else:
+                if not battle.is_started:
                     inventory.drag_item(event.pos)
             elif event.type == pg.MOUSEMOTION:
-                inventory.move_dragged_item(event.rel)
+                if not battle.is_started:
+                    inventory.move_dragged_item(event.rel)
+            elif event.type == NEXT_TURN_EVENT:
+                battle.next_turn()
 
         battle.character_group.update()
 
         # draw everything on screen
         draw_layout(background, screen)
         battle.character_group.draw(screen)
+        if not battle.is_started and not ended:
+            start_battle_button.process()
         for character in battle.character_list:
             character.draw_health_bar(screen)
         inventory.draw()
 
         if battle.has_ended():
+            battle.stop()
             battle_index += 1
             is_won = battle.is_won()
             if is_won and battle_index < len(enemy_types):
@@ -79,9 +86,10 @@ def main():
                     screen, spritesheet, enemy_types[battle_index]
                 )
                 battle = Battle([player, current_enemy])
+                start_battle_button.on_click_function = battle.start
             else:
                 # if battle lost or won last battle, end game
-                display_end_text(screen, is_won)
+                display_end_screen(screen, is_won)
                 if not ended:
                     ended = True
                     pg.time.set_timer(pg.QUIT, 1000)
@@ -95,7 +103,14 @@ def is_on_battle_side(pos, background):
     return pos[0] < background.get_width() / 2
 
 
-def display_end_text(screen, is_won):
+def display_end_screen(screen, is_won):
+    # dark overlay
+    background = pg.Surface(screen.get_size())
+    background = background.convert()
+    background.fill((0, 0, 0))
+    background.set_alpha(220)
+    screen.blit(background, (0, 0))
+    # end text
     font = pg.font.Font(dogica_path, 64)
     text_str = "You Win!" if is_won else "Game Over"
     text = font.render(text_str, True, (255, 255, 255))
@@ -110,7 +125,6 @@ def create_background(screen):
     background = background.convert()
     background.fill(dark_green)
     screen.blit(background, (0, 0))
-    pg.display.flip()
     return background
 
 
@@ -183,6 +197,18 @@ def draw_layout(background, screen):
         (screen.get_width() / 2, screen.get_height() / 2),
         (screen.get_width(), screen.get_height() / 2),
         5,
+    )
+
+
+def create_start_battle_button(screen, battle):
+    return Button(
+        screen,
+        screen.get_width() / 4,
+        screen.get_height() * 3 / 4,
+        200,
+        80,
+        "Fight!",
+        battle.start,
     )
 
 

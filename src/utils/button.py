@@ -1,0 +1,70 @@
+import pygame as pg
+
+from utils.utils import dogica_path
+
+
+class Button:
+    def __init__(
+        self,
+        screen,
+        centerx,
+        centery,
+        width,
+        height,
+        text,
+        on_click_function=None,
+    ):
+        self.screen = screen
+        self.centerx = centerx
+        self.centery = centery
+        self.width = width
+        self.height = height
+        self.on_click_function = on_click_function
+
+        self.fill_colors = {
+            "normal": "#00dd00",
+            "hover": "#006600",
+            "pressed": "#003300",
+        }
+
+        self.surface = pg.Surface((self.width, self.height))
+        self.rect = pg.Rect(0, 0, self.width, self.height)
+        self.rect.center = (centerx, centery)
+        font = pg.font.Font(dogica_path, 32)
+        self.text = font.render(text, True, (20, 20, 20))
+
+    def process(self):
+        mousePos = pg.mouse.get_pos()
+        self.surface.fill(self.fill_colors["normal"])
+        if self.rect.collidepoint(mousePos):
+            self.surface.fill(self.fill_colors["hover"])
+            if pg.mouse.get_pressed(num_buttons=3)[0]:
+                self.surface.fill(self.fill_colors["pressed"])
+
+        self.surface.blit(
+            self.text,
+            [
+                self.rect.width / 2 - self.text.get_rect().width / 2,
+                self.rect.height / 2 - self.text.get_rect().height / 2,
+            ],
+        )
+        self.screen.blit(self.surface, self.rect)
+        draw_borders(
+            self.screen,
+            self.centerx,
+            self.centery,
+            self.width,
+            self.height,
+            5,
+            (150, 150, 150),
+        )
+
+    def click(self, pos):
+        if self.rect.collidepoint(pos):
+            self.on_click_function()
+
+
+def draw_borders(surface, centerx, centery, width, height, thickness, color):
+    x = centerx - width / 2
+    y = centery - height / 2
+    return pg.draw.rect(surface, color, (x, y, width, height), thickness)

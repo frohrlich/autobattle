@@ -6,7 +6,7 @@ class ItemType(Enum):
 
 
 character_infos = {
-    "ARCHER": {"name": "Archer", "sprite": (0, 3), "hp": 100, "strength": 1},
+    "ARCHER": {"name": "Archer", "sprite": (0, 3), "hp": 100, "strength": 10},
     "PIG": {"name": "Archer", "sprite": (0, 0), "hp": 100, "strength": 5},
     "WASP": {"name": "Wasp", "sprite": (4, 0), "hp": 125, "strength": 10},
     "GHOST": {"name": "Ghost", "sprite": (4, 3), "hp": 150, "strength": 15},
