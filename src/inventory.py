@@ -11,7 +11,7 @@ class ItemType(Enum):
 
 
 class Item(pg.sprite.Sprite):
-    """represents a wearable item with its bonuses"""
+    """Represents a wearable item with its bonuses."""
 
     scale = 4
 
@@ -33,7 +33,7 @@ class Item(pg.sprite.Sprite):
 
 
 class Inventory:
-    """represents the inventory and gear slots"""
+    """Represents the inventory and gear slots."""
 
     def __init__(self, screen, slots, *args):
         self.screen = screen
@@ -62,9 +62,7 @@ class Inventory:
                 self.dragged_item = item
 
     def drop_dragged_item(self, pos):
-        """drop a dragged item from the inventory into a gear slot,
-        and vice versa"""
-
+        """Drop a dragged item from the inventory into a gear slot, and vice versa."""
         if self.dragged_item is not None:
             # move from gear slot to inventory
             if slot := self.get_slot(self.dragged_item):

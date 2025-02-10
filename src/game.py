@@ -3,15 +3,16 @@ import sys
 
 import pygame as pg
 
-from character import Character, Player
-from inventory import (
-    Inventory,
-    Item,
-    ItemType,
-    Slot,
-)
+from character import Character
+from character import Player
+from inventory import Inventory
+from inventory import Item
+from inventory import ItemType
+from inventory import Slot
 from utils.spritesheet import Spritesheet
-from utils.utils import dark_green, dogica_path, img_dir
+from utils.utils import dark_green
+from utils.utils import dogica_path
+from utils.utils import img_dir
 
 if not pg.font:
     print("Warning, fonts disabled")

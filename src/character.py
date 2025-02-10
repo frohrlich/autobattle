@@ -4,7 +4,7 @@ colorkey = (255, 0, 220)
 
 
 class Character(pg.sprite.Sprite):
-    """represents a character in battle"""
+    """Represents a character in battle."""
 
     animation_speed = 5
     scale = 5
@@ -59,8 +59,7 @@ class Character(pg.sprite.Sprite):
         return self._strength
 
     def animate_attack(self):
-        """make character move towards enemy and then return to original position"""
-
+        """Make character move towards enemy and then return to original position."""
         direction = 1 if self.face_right else -1
 
         target_position = (
@@ -132,12 +131,12 @@ class Player(Character):
         )
         self.inventory = inventory
 
-        self.max_hp = self.max_hp + sum((item.hp for item in self.get_items()))
+        self.max_hp = self.max_hp + sum(item.hp for item in self.get_items())
         self.hp = self.max_hp
 
     @property
     def strength(self):
-        return self._strength + sum((item.strength for item in self.get_items()))
+        return self._strength + sum(item.strength for item in self.get_items())
 
     def get_items(self):
         return (slot.item for slot in self.inventory.slots if slot.item is not None)
