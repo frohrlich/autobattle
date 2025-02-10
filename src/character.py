@@ -14,7 +14,7 @@ class Character(pg.sprite.Sprite):
         spritesheet,
         base_sprite,
         position,
-        face_right,
+        is_ally,
         base_hp,
         base_strength,
     ):
@@ -22,13 +22,14 @@ class Character(pg.sprite.Sprite):
 
         self.base_sprite = base_sprite
         self.spritesheet = spritesheet
-        self.face_right = face_right
+        self.is_ally = is_ally
         self.max_hp = base_hp
         self.hp = base_hp
         self._strength = base_strength
 
         # which sprite to use depending on character facing right or left
-        if face_right:
+        # (allies face right and enemies face left)
+        if is_ally:
             use_sprite = (base_sprite[0] + 1, base_sprite[1])
         else:
             use_sprite = (base_sprite[0] + 2, base_sprite[1])
@@ -60,7 +61,7 @@ class Character(pg.sprite.Sprite):
 
     def animate_attack(self):
         """Make character move towards enemy and then return to original position."""
-        direction = 1 if self.face_right else -1
+        direction = 1 if self.is_ally else -1
 
         target_position = (
             self.initial_position[0] + direction * 50,
@@ -115,7 +116,7 @@ class Player(Character):
         spritesheet,
         base_sprite,
         position,
-        face_right,
+        is_ally,
         base_hp,
         base_strength,
         inventory,
@@ -125,7 +126,7 @@ class Player(Character):
             spritesheet,
             base_sprite,
             position,
-            face_right,
+            is_ally,
             base_hp,
             base_strength,
         )

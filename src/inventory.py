@@ -1,13 +1,8 @@
-from enum import Enum
-
 import pygame as pg
 
 from character import colorkey
+from data.data import item_infos
 from utils.utils import dogica_path
-
-
-class ItemType(Enum):
-    WEAPON = 1
 
 
 class Item(pg.sprite.Sprite):
@@ -15,15 +10,16 @@ class Item(pg.sprite.Sprite):
 
     scale = 4
 
-    def __init__(self, spritesheet, sprite, item_type, strength=0, hp=0):
+    def __init__(self, spritesheet, item_type):
+        item_info = item_infos[item_type]
         pg.sprite.Sprite.__init__(self)
         self.spritesheet = spritesheet
-        self.sprite = sprite
-        self.item_type = item_type
-        self.strength = strength
-        self.hp = hp
+        self.sprite = item_info["sprite"]
+        self.item_type = item_info["item_type"]
+        self.strength = item_info["strength"]
+        self.hp = item_info["hp"]
 
-        image, rect = spritesheet.image_at_index(sprite, colorkey)
+        image, rect = spritesheet.image_at_index(self.sprite, colorkey)
 
         size = image.get_size()
         size = (size[0] * self.scale, size[1] * self.scale)
@@ -74,8 +70,12 @@ class Inventory:
             else:
                 # move from inventory to gear slot
                 for slot in self.slots:
-                    # slot must be empty
-                    if slot.rect.collidepoint(pos) and slot.item is None:
+                    # slot must be empty and same type as item
+                    if (
+                        slot.rect.collidepoint(pos)
+                        and slot.item_type == self.dragged_item.item_type
+                        and slot.item is None
+                    ):
                         slot.item = self.dragged_item
                         break
             self.dragged_item = None
@@ -135,7 +135,7 @@ class Slot:
         )
         # title
         font = pg.font.Font(dogica_path, 16)
-        text = font.render(self.item_type, True, (255, 255, 255))
+        text = font.render(self.item_type.name.capitalize(), True, (255, 255, 255))
         textpos = text.get_rect(
             centerx=self.base_x + self.size / 2, centery=self.base_y - 20
         )

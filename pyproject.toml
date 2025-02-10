@@ -18,7 +18,6 @@ select = [
     "UP", # pyupgrade
 ]
 ignore = [
-    "E501", # line-too-long
     "E722", # bare-except
     "D100", # public module
     "D101", # public class

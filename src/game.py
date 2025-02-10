@@ -3,11 +3,13 @@ import sys
 
 import pygame as pg
 
+from battle import Battle
 from character import Character
 from character import Player
+from data.data import ItemType
+from data.data import character_infos
 from inventory import Inventory
 from inventory import Item
-from inventory import ItemType
 from inventory import Slot
 from utils.spritesheet import Spritesheet
 from utils.utils import dark_green
@@ -27,8 +29,14 @@ def main():
     background = create_background(screen)
     inventory = initialize_inventory(spritesheet, screen)
 
-    character_list, character_group = create_characters(screen, spritesheet, inventory)
-    battle = Battle(character_list)
+    player_type = "ARCHER"
+    player = create_player(screen, spritesheet, player_type, inventory)
+    # the enemies we will have to fight in successive battles
+    enemy_types = ("PIG", "WASP", "GHOST")
+    # initialize first battle between our player and the first enemy of the list
+    battle_index = 0
+    current_enemy = create_enemy(screen, spritesheet, enemy_types[battle_index])
+    battle = Battle([player, current_enemy])
 
     # start main game loop
     clock = pg.time.Clock()
@@ -48,59 +56,48 @@ def main():
                 if is_on_battle_side(event.pos, background):
                     if not ended and battle.is_previous_turn_finished():
                         battle.next_turn()
-                inventory.drag_item(event.pos)
+                else:
+                    inventory.drag_item(event.pos)
             elif event.type == pg.MOUSEMOTION:
                 inventory.move_dragged_item(event.rel)
 
-        character_group.update()
+        battle.character_group.update()
 
         # draw everything on screen
         draw_layout(background, screen)
-        character_group.draw(screen)
-        for character in character_list:
+        battle.character_group.draw(screen)
+        for character in battle.character_list:
             character.draw_health_bar(screen)
         inventory.draw()
 
         if battle.has_ended():
-            display_end_text(screen)
-            if not ended:
-                ended = True
-                pg.time.set_timer(pg.QUIT, 1000)
+            battle_index += 1
+            is_won = battle.is_won()
+            if is_won and battle_index < len(enemy_types):
+                # go to next battle
+                current_enemy = create_enemy(
+                    screen, spritesheet, enemy_types[battle_index]
+                )
+                battle = Battle([player, current_enemy])
+            else:
+                # if battle lost or won last battle, end game
+                display_end_text(screen, is_won)
+                if not ended:
+                    ended = True
+                    pg.time.set_timer(pg.QUIT, 1000)
 
         pg.display.flip()
 
     pg.quit()
 
 
-class Battle:
-    def __init__(self, character_list):
-        self.character_list = character_list
-        self.turn = 0
-
-    def next_turn(self):
-        index = self.turn % len(self.character_list)
-        next_index = (self.turn + 1) % len(self.character_list)
-        current_character = self.character_list[index]
-        target = self.character_list[next_index]
-
-        current_character.attack(target)
-
-        self.turn += 1
-
-    def is_previous_turn_finished(self):
-        return not any(character.attacking for character in self.character_list)
-
-    def has_ended(self):
-        return any(character.is_dead() for character in self.character_list)
-
-
 def is_on_battle_side(pos, background):
     return pos[0] < background.get_width() / 2
 
 
-def display_end_text(screen):
+def display_end_text(screen, is_won):
     font = pg.font.Font(dogica_path, 64)
-    text_str = "Game Over"
+    text_str = "You Win!" if is_won else "Game Over"
     text = font.render(text_str, True, (255, 255, 255))
     textpos = text.get_rect(
         centerx=screen.get_width() / 2, centery=screen.get_height() / 2
@@ -118,21 +115,38 @@ def create_background(screen):
 
 
 def initialize_inventory(spritesheet, screen):
-    trident = Item(spritesheet, (8, 9), ItemType.WEAPON, strength=10, hp=12)
-    anvil = Item(spritesheet, (9, 10), ItemType.WEAPON, strength=40, hp=4)
-    slot = Slot("Weapon")
+    trident = Item(spritesheet, "TRIDENT")
+    anvil = Item(spritesheet, "ANVIL")
+    slot = Slot(ItemType.WEAPON)
     inventory = Inventory(screen, [slot], trident, anvil)
     return inventory
 
 
-def create_characters(screen, spritesheet, inventory):
-    player_pos = pg.Vector2(screen.get_width() / 8, screen.get_height() / 2)
+def create_enemy(screen, spritesheet, character_type):
     enemy_pos = pg.Vector2(screen.get_width() * 3 / 8, screen.get_height() / 2)
-    player = Player(spritesheet, (0, 3), player_pos, True, 100, 1, inventory)
-    enemy = Character(spritesheet, (0, 0), enemy_pos, False, 100, 5)
-    character_list = (player, enemy)
-    character_group = pg.sprite.RenderPlain(character_list)
-    return character_list, character_group
+    enemy_info = character_infos[character_type]
+    return Character(
+        spritesheet,
+        enemy_info["sprite"],
+        enemy_pos,
+        False,
+        enemy_info["hp"],
+        enemy_info["strength"],
+    )
+
+
+def create_player(screen, spritesheet, character_type, inventory):
+    player_info = character_infos[character_type]
+    player_pos = pg.Vector2(screen.get_width() / 8, screen.get_height() / 2)
+    return Player(
+        spritesheet,
+        player_info["sprite"],
+        player_pos,
+        True,
+        player_info["hp"],
+        player_info["strength"],
+        inventory,
+    )
 
 
 def draw_layout(background, screen):
