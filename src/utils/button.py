@@ -1,6 +1,7 @@
 import pygame as pg
 
 from utils.utils import dogica_path
+from utils.utils import draw_borders
 
 
 class Button:
@@ -22,7 +23,7 @@ class Button:
         self.on_click_function = on_click_function
 
         self.fill_colors = {
-            "normal": "#00dd00",
+            "normal": "#00aa00",
             "hover": "#006600",
             "pressed": "#003300",
         }
@@ -62,9 +63,3 @@ class Button:
     def click(self, pos):
         if self.rect.collidepoint(pos):
             self.on_click_function()
-
-
-def draw_borders(surface, centerx, centery, width, height, thickness, color):
-    x = centerx - width / 2
-    y = centery - height / 2
-    return pg.draw.rect(surface, color, (x, y, width, height), thickness)

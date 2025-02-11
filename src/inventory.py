@@ -2,7 +2,9 @@ import pygame as pg
 
 from character import colorkey
 from data.data import item_infos
+from utils.utils import dogica_bold_path
 from utils.utils import dogica_path
+from utils.utils import draw_borders
 
 
 class Item(pg.sprite.Sprite):
@@ -11,13 +13,13 @@ class Item(pg.sprite.Sprite):
     scale = 4
 
     def __init__(self, spritesheet, item_type):
-        item_info = item_infos[item_type]
+        self.item_info = item_infos[item_type]
         pg.sprite.Sprite.__init__(self)
         self.spritesheet = spritesheet
-        self.sprite = item_info["sprite"]
-        self.item_type = item_info["item_type"]
-        self.strength = item_info["strength"]
-        self.hp = item_info["hp"]
+        self.sprite = self.item_info["sprite"]
+        self.item_type = self.item_info["item_type"]
+        self.strength = self.item_info["strength"]
+        self.hp = self.item_info["hp"]
 
         image, rect = spritesheet.image_at_index(self.sprite, colorkey)
 
@@ -26,6 +28,69 @@ class Item(pg.sprite.Sprite):
         image = pg.transform.scale(image, size)
 
         self.image, self.rect = image, image.get_rect()
+
+    def process(self, screen):
+        mousePos = pg.mouse.get_pos()
+        if self.rect.collidepoint(mousePos):
+            self.draw_infobox(screen)
+
+    def draw_infobox(self, screen):
+        font = pg.font.Font(dogica_path, 16)
+        font_bold = pg.font.Font(dogica_bold_path, 16)
+        text_color = (25, 25, 25)
+        margin_y = 6
+        margin_x = 6
+        height = margin_y
+        width = margin_x
+
+        text_str = font.render(
+            f"strength:{self.item_info['strength']}", True, text_color
+        )
+        text_str_rect = text_str.get_rect()
+        width = max(width, text_str_rect.width)
+        height += text_str_rect.height + margin_y
+        text_str_rect.bottom = self.rect.top - margin_y
+        text_str_rect.left = self.rect.right + margin_x
+
+        text_hp = font.render(f"health:{self.item_info['hp']}", True, text_color)
+        text_hp_rect = text_hp.get_rect()
+        width = max(width, text_hp_rect.width)
+        text_hp_rect.bottom = self.rect.top - height
+        text_hp_rect.left = self.rect.right + margin_x
+        height += text_hp_rect.height + margin_y
+
+        height += margin_y
+        text_name = font_bold.render(self.item_info["name"], True, text_color)
+        text_name_rect = text_name.get_rect()
+        width = max(width, text_name_rect.width)
+        text_name_rect.bottom = self.rect.top - height
+        text_name_rect.left = self.rect.right + margin_x
+        height += text_name_rect.height + margin_y
+
+        width += margin_x * 2
+
+        rect = pg.draw.rect(
+            screen,
+            "#00aa00",
+            pg.Rect(
+                self.rect.right,
+                self.rect.top - height,
+                width,
+                height,
+            ),
+        )
+        draw_borders(
+            screen,
+            rect.centerx,
+            rect.centery,
+            rect.width,
+            rect.height,
+            3,
+            (100, 100, 100),
+        )
+        screen.blit(text_str, text_str_rect)
+        screen.blit(text_hp, text_hp_rect)
+        screen.blit(text_name, text_name_rect)
 
 
 class Inventory:
@@ -51,6 +116,11 @@ class Inventory:
             slot.draw(self.screen)
 
         self.items.draw(self.screen)
+
+        # show infobox
+        if self.dragged_item is None:
+            for item in self.items:
+                item.process(self.screen)
 
     def drag_item(self, pos):
         for item in self.items.sprites():
