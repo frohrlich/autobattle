@@ -145,6 +145,9 @@ class Inventory:
             slot.draw(self.screen)
 
         self.items.draw(self.screen)
+        # dragged item should always be drawn on top
+        if self.dragged_item:
+            self.screen.blit(self.dragged_item.image, self.dragged_item.rect)
 
         # show infobox
         if self.dragged_item is None:
@@ -159,19 +162,17 @@ class Inventory:
     def drop_dragged_item(self, pos):
         """Drop a dragged item from the inventory into a gear slot, and vice versa."""
         if self.dragged_item is not None:
-            # move from gear slot to inventory
             if slot := self.get_slot(self.dragged_item):
                 if is_pos_inside_inventory(pos, self.screen):
                     self.move_item_from_slot_to_inventory(slot)
             else:
-                # move from inventory to gear slot
                 for slot in self.slots:
-                    # slot must be empty and same type as item
                     if (
                         slot.rect.collidepoint(pos)
                         and slot.item_type == self.dragged_item.item_type
-                        and slot.item is None
                     ):
+                        if slot.item is not None:
+                            self.move_item_from_slot_to_inventory(slot)
                         self.move_item_from_inventory_to_slot(slot, self.dragged_item)
                         break
             self.dragged_item = None
