@@ -4,6 +4,8 @@ from enum import Enum
 
 class ItemType(Enum):
     WEAPON = 1
+    CAPE = 2
+    HAT = 3
 
 
 character_infos = {
@@ -27,6 +29,20 @@ item_infos = {
         "strength": 40,
         "vitality": 0,
     },
+    "NET_CAPE": {
+        "name": "Net cape",
+        "sprite": (8, 8),
+        "item_type": ItemType.CAPE,
+        "strength": 0,
+        "vitality": 1000,
+    },
+    "SPACE_HELMET": {
+        "name": "Space helmet",
+        "sprite": (8, 10),
+        "item_type": ItemType.HAT,
+        "strength": 0,
+        "vitality": 50,
+    },
 }
 
 
@@ -42,7 +58,7 @@ class CharacterInfo:
 class ItemInfo:
     name: str
     sprite: tuple
-    item_type: int
+    item_type: ItemType
     vitality: int
     strength: int
 

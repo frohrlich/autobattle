@@ -19,13 +19,12 @@ class Character(pg.sprite.Sprite):
         base_strength,
     ):
         pg.sprite.Sprite.__init__(self)
-
         self.base_sprite = base_sprite
         self.spritesheet = spritesheet
         self.is_ally = is_ally
         self.max_hp = base_hp
         self.hp = base_hp
-        self._strength = base_strength
+        self.strength = base_strength
 
         # which sprite to use depending on character facing right or left
         # (allies face right and enemies face left)
@@ -54,10 +53,6 @@ class Character(pg.sprite.Sprite):
     def attack(self, target):
         self.attacking = True
         target.hp -= self.strength
-
-    @property
-    def strength(self):
-        return self._strength
 
     def animate_attack(self):
         """Make character move towards enemy and then return to original position."""
@@ -109,35 +104,12 @@ class Character(pg.sprite.Sprite):
     def is_dead(self):
         return self.hp <= 0
 
+    def add_item(self, item):
+        self.max_hp += item.vitality
+        self.hp += item.vitality
+        self.strength += item.strength
 
-class Player(Character):
-    def __init__(
-        self,
-        spritesheet,
-        base_sprite,
-        position,
-        is_ally,
-        base_hp,
-        base_strength,
-        inventory,
-    ):
-        Character.__init__(
-            self,
-            spritesheet,
-            base_sprite,
-            position,
-            is_ally,
-            base_hp,
-            base_strength,
-        )
-        self.inventory = inventory
-
-        self.max_hp = self.max_hp + sum(item.hp for item in self.get_items())
-        self.hp = self.max_hp
-
-    @property
-    def strength(self):
-        return self._strength + sum(item.strength for item in self.get_items())
-
-    def get_items(self):
-        return (slot.item for slot in self.inventory.slots if slot.item is not None)
+    def remove_item(self, item):
+        self.max_hp -= item.vitality
+        self.hp -= item.vitality
+        self.strength -= item.strength

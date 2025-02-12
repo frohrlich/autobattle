@@ -1,6 +1,7 @@
 import pygame as pg
 
 from character import colorkey
+from data.data import ItemType
 from data.data import get_item_info
 from utils.utils import dogica_bold_path
 from utils.utils import dogica_path
@@ -19,7 +20,7 @@ class Item(pg.sprite.Sprite):
         self.sprite = self.item_info.sprite
         self.item_type = self.item_info.item_type
         self.strength = self.item_info.strength
-        self.hp = self.item_info.vitality
+        self.vitality = self.item_info.vitality
 
         image, rect = spritesheet.image_at_index(self.sprite, colorkey)
 
@@ -37,27 +38,38 @@ class Item(pg.sprite.Sprite):
     def draw_infobox(self, screen):
         font = pg.font.Font(dogica_path, 16)
         font_bold = pg.font.Font(dogica_bold_path, 16)
+        font_small = pg.font.Font(dogica_path, 12)
         text_color = (25, 25, 25)
-        margin_y = 6
-        margin_x = 6
+        text_small_color = (50, 50, 50)
+        margin_y = 8
+        margin_x = 8
+        border_width = 3
         height = margin_y
         width = margin_x
-
-        text_str = font.render(f"strength:{self.item_info.strength}", True, text_color)
+        # strength
+        text_str = font.render(f"strength: {self.item_info.strength}", True, text_color)
         text_str_rect = text_str.get_rect()
         width = max(width, text_str_rect.width)
         height += text_str_rect.height + margin_y
         text_str_rect.bottom = self.rect.top - margin_y
         text_str_rect.left = self.rect.right + margin_x
-
-        text_hp = font.render(f"vitality:{self.item_info.vitality}", True, text_color)
+        # vitality
+        text_hp = font.render(f"vitality: {self.item_info.vitality}", True, text_color)
         text_hp_rect = text_hp.get_rect()
         width = max(width, text_hp_rect.width)
         text_hp_rect.bottom = self.rect.top - height
         text_hp_rect.left = self.rect.right + margin_x
         height += text_hp_rect.height + margin_y
-
-        height += margin_y
+        # item type
+        text_type = font_small.render(
+            self.item_type.name.capitalize(), True, text_small_color
+        )
+        text_type_rect = text_type.get_rect()
+        width = max(width, text_type_rect.width)
+        text_type_rect.bottom = self.rect.top - height
+        text_type_rect.left = self.rect.right + margin_x
+        height += text_type_rect.height + margin_y
+        # name
         text_name = font_bold.render(self.item_info.name, True, text_color)
         text_name_rect = text_name.get_rect()
         width = max(width, text_name_rect.width)
@@ -67,35 +79,54 @@ class Item(pg.sprite.Sprite):
 
         width += margin_x * 2
 
-        rect = pg.draw.rect(
-            screen,
-            "#00aa00",
-            pg.Rect(
-                self.rect.right,
-                self.rect.top - height,
-                width,
-                height,
-            ),
+        rect = pg.Rect(
+            self.rect.right,
+            self.rect.top - height,
+            width,
+            height,
         )
+
+        if rect.right >= screen.get_width():
+            rect.right = self.rect.left
+            left = self.rect.left - width + margin_x
+            text_name_rect.left = left
+            text_type_rect.left = left
+            text_hp_rect.left = left
+            text_str_rect.left = left
+
+        if rect.top <= 0:
+            rect.top = self.rect.bottom
+            offset = (
+                (self.rect.top - text_name_rect.bottom) * 2 + margin_y + border_width
+            )
+            text_name_rect.y += offset
+            text_type_rect.y += offset
+            text_hp_rect.y += offset
+            text_str_rect.y += offset
+
+        rect = pg.draw.rect(screen, "#00aa00", rect)
+
         draw_borders(
             screen,
             rect.centerx,
             rect.centery,
             rect.width,
-            rect.height,
-            3,
+            rect.height + 1,
+            border_width,
             (100, 100, 100),
         )
         screen.blit(text_str, text_str_rect)
         screen.blit(text_hp, text_hp_rect)
+        screen.blit(text_type, text_type_rect)
         screen.blit(text_name, text_name_rect)
 
 
 class Inventory:
     """Represents the inventory and gear slots."""
 
-    def __init__(self, screen, slots, *args):
+    def __init__(self, screen, player, slots, *args):
         self.screen = screen
+        self.player = player
         self.items = pg.sprite.RenderPlain(args)
         self.slots = slots
         self.dragged_item = None
@@ -131,10 +162,7 @@ class Inventory:
             # move from gear slot to inventory
             if slot := self.get_slot(self.dragged_item):
                 if is_pos_inside_inventory(pos, self.screen):
-                    slot.item = None
-                    # move item to end of inventory
-                    self.items.remove(self.dragged_item)
-                    self.items.add(self.dragged_item)
+                    self.move_item_from_slot_to_inventory(slot)
             else:
                 # move from inventory to gear slot
                 for slot in self.slots:
@@ -144,7 +172,7 @@ class Inventory:
                         and slot.item_type == self.dragged_item.item_type
                         and slot.item is None
                     ):
-                        slot.item = self.dragged_item
+                        self.move_item_from_inventory_to_slot(slot, self.dragged_item)
                         break
             self.dragged_item = None
             self.refresh_item_positions()
@@ -180,20 +208,30 @@ class Inventory:
         for i, item in enumerate(items_in_inventory):
             self.put_item_inside_inventory(i, item)
 
+    def move_item_from_slot_to_inventory(self, slot):
+        self.player.remove_item(slot.item)
+        # move item to end of inventory
+        self.items.remove(slot.item)
+        self.items.add(slot.item)
+
+        slot.item = None
+
+    def move_item_from_inventory_to_slot(self, slot, item):
+        self.player.add_item(item)
+        slot.item = item
+
 
 class Slot:
-    def __init__(self, item_type):
+    def __init__(self, screen, item_type):
+        self.screen = screen
         self.item_type = item_type
         self.item = None
         self.rect = None
-        self.base_x = 0
-        self.base_y = 70
         self.size = 76
         self.image_size = 64
+        self.position_slot()
 
     def draw(self, screen):
-        self.base_x = screen.get_width() / 2 + 40
-
         outer_rect = (self.base_x, self.base_y, self.size, self.size)
         # outline
         self.rect = pg.draw.rect(
@@ -216,6 +254,22 @@ class Slot:
             self.image_size,
             self.image_size,
         )
+
+    def position_slot(self):
+        border_x = 40
+        border_y = 70
+        match self.item_type:
+            case ItemType.WEAPON:
+                self.base_x = self.screen.get_width() / 2 + border_x
+                self.base_y = border_y
+            case ItemType.CAPE:
+                self.base_x = self.screen.get_width() - self.size - border_x
+                self.base_y = border_y
+            case ItemType.HAT:
+                self.base_x = self.screen.get_width() - self.size - border_x * 2
+                self.base_y = border_y * 2 + self.size
+            case _:
+                raise RuntimeError("Invalid item type for slot")
 
 
 def is_pos_inside_inventory(pos, screen):

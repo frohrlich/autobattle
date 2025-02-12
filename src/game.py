@@ -5,7 +5,6 @@ import pygame as pg
 
 from battle import Battle
 from character import Character
-from character import Player
 from data.data import ItemType
 from data.data import get_character_info
 from inventory import Inventory
@@ -29,15 +28,29 @@ def main():
     pg.display.set_caption("Autobattle")
 
     background = create_background(screen)
-    inventory = initialize_inventory(spritesheet, screen)
 
     player_type = "ARCHER"
-    player = create_player(screen, spritesheet, player_type, inventory)
+    player_position = (screen.get_width() / 8, screen.get_height() / 2)
+    player = create_character(
+        screen,
+        spritesheet,
+        player_type,
+        True,
+        player_position,
+    )
     # the enemies we will have to fight in successive battles
     enemy_types = ("PIG", "WASP", "GHOST")
     # initialize first battle between our player and the first enemy of the list
     battle_index = 0
-    current_enemy = create_enemy(screen, spritesheet, enemy_types[battle_index])
+    enemy_position = (screen.get_width() * 3 / 8, screen.get_height() / 2)
+    current_enemy = create_character(
+        screen,
+        spritesheet,
+        enemy_types[battle_index],
+        False,
+        enemy_position,
+    )
+    inventory = initialize_inventory(spritesheet, screen, player)
     battle = Battle([player, current_enemy])
     start_battle_button = create_start_battle_button(screen, battle)
 
@@ -82,8 +95,12 @@ def main():
             is_won = battle.is_won()
             if is_won and battle_index < len(enemy_types):
                 # go to next battle
-                current_enemy = create_enemy(
-                    screen, spritesheet, enemy_types[battle_index]
+                current_enemy = create_character(
+                    screen,
+                    spritesheet,
+                    enemy_types[battle_index],
+                    False,
+                    enemy_position,
                 )
                 battle = Battle([player, current_enemy])
                 start_battle_button.on_click_function = battle.start
@@ -128,38 +145,35 @@ def create_background(screen):
     return background
 
 
-def initialize_inventory(spritesheet, screen):
+def initialize_inventory(spritesheet, screen, player):
     trident = Item(spritesheet, "TRIDENT")
     anvil = Item(spritesheet, "ANVIL")
-    slot = Slot(ItemType.WEAPON)
-    inventory = Inventory(screen, [slot], trident, anvil)
+    net_cape = Item(spritesheet, "NET_CAPE")
+    space_helmet = Item(spritesheet, "SPACE_HELMET")
+    weapon_slot = Slot(screen, ItemType.WEAPON)
+    cape_slot = Slot(screen, ItemType.CAPE)
+    hat_slot = Slot(screen, ItemType.HAT)
+    inventory = Inventory(
+        screen,
+        player,
+        [weapon_slot, cape_slot, hat_slot],
+        trident,
+        anvil,
+        net_cape,
+        space_helmet,
+    )
     return inventory
 
 
-def create_enemy(screen, spritesheet, character_type):
-    enemy_pos = pg.Vector2(screen.get_width() * 3 / 8, screen.get_height() / 2)
-    enemy_info = get_character_info(character_type)
+def create_character(screen, spritesheet, character_type, is_ally, position):
+    character_info = get_character_info(character_type)
     return Character(
         spritesheet,
-        enemy_info.sprite,
-        enemy_pos,
-        False,
-        enemy_info.vitality,
-        enemy_info.strength,
-    )
-
-
-def create_player(screen, spritesheet, character_type, inventory):
-    player_info = get_character_info(character_type)
-    player_pos = pg.Vector2(screen.get_width() / 8, screen.get_height() / 2)
-    return Player(
-        spritesheet,
-        player_info.sprite,
-        player_pos,
-        True,
-        player_info.vitality,
-        player_info.strength,
-        inventory,
+        character_info.sprite,
+        position,
+        is_ally,
+        character_info.vitality,
+        character_info.strength,
     )
 
 
