@@ -6,6 +6,7 @@ class ItemType(Enum):
     WEAPON = 1
     CAPE = 2
     HAT = 3
+    BOOTS = 4
 
 
 character_infos = {
@@ -42,6 +43,13 @@ item_infos = {
         "item_type": ItemType.HAT,
         "strength": 0,
         "vitality": 50,
+    },
+    "BEE_BOOTS": {
+        "name": "Bee boots",
+        "sprite": (8, 6),
+        "item_type": ItemType.BOOTS,
+        "strength": 50,
+        "vitality": 1000,
     },
 }
 

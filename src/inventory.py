@@ -269,6 +269,9 @@ class Slot:
             case ItemType.HAT:
                 self.base_x = self.screen.get_width() - self.size - border_x * 2
                 self.base_y = border_y * 2 + self.size
+            case ItemType.BOOTS:
+                self.base_x = self.screen.get_width() / 2 + border_x * 2
+                self.base_y = border_y * 2 + self.size
             case _:
                 raise RuntimeError("Invalid item type for slot")
 

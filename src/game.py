@@ -150,17 +150,20 @@ def initialize_inventory(spritesheet, screen, player):
     anvil = Item(spritesheet, "ANVIL")
     net_cape = Item(spritesheet, "NET_CAPE")
     space_helmet = Item(spritesheet, "SPACE_HELMET")
+    bee_boots = Item(spritesheet, "BEE_BOOTS")
     weapon_slot = Slot(screen, ItemType.WEAPON)
     cape_slot = Slot(screen, ItemType.CAPE)
     hat_slot = Slot(screen, ItemType.HAT)
+    boot_slot = Slot(screen, ItemType.BOOTS)
     inventory = Inventory(
         screen,
         player,
-        [weapon_slot, cape_slot, hat_slot],
+        [weapon_slot, cape_slot, hat_slot, boot_slot],
         trident,
         anvil,
         net_cape,
         space_helmet,
+        bee_boots,
     )
     return inventory
 
