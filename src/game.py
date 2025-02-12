@@ -7,7 +7,7 @@ from battle import Battle
 from character import Character
 from character import Player
 from data.data import ItemType
-from data.data import character_infos
+from data.data import get_character_info
 from inventory import Inventory
 from inventory import Item
 from inventory import Slot
@@ -138,27 +138,27 @@ def initialize_inventory(spritesheet, screen):
 
 def create_enemy(screen, spritesheet, character_type):
     enemy_pos = pg.Vector2(screen.get_width() * 3 / 8, screen.get_height() / 2)
-    enemy_info = character_infos[character_type]
+    enemy_info = get_character_info(character_type)
     return Character(
         spritesheet,
-        enemy_info["sprite"],
+        enemy_info.sprite,
         enemy_pos,
         False,
-        enemy_info["hp"],
-        enemy_info["strength"],
+        enemy_info.vitality,
+        enemy_info.strength,
     )
 
 
 def create_player(screen, spritesheet, character_type, inventory):
-    player_info = character_infos[character_type]
+    player_info = get_character_info(character_type)
     player_pos = pg.Vector2(screen.get_width() / 8, screen.get_height() / 2)
     return Player(
         spritesheet,
-        player_info["sprite"],
+        player_info.sprite,
         player_pos,
         True,
-        player_info["hp"],
-        player_info["strength"],
+        player_info.vitality,
+        player_info.strength,
         inventory,
     )
 

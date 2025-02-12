@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -6,10 +7,10 @@ class ItemType(Enum):
 
 
 character_infos = {
-    "ARCHER": {"name": "Archer", "sprite": (0, 3), "hp": 100, "strength": 10},
-    "PIG": {"name": "Archer", "sprite": (0, 0), "hp": 100, "strength": 5},
-    "WASP": {"name": "Wasp", "sprite": (4, 0), "hp": 125, "strength": 10},
-    "GHOST": {"name": "Ghost", "sprite": (4, 3), "hp": 150, "strength": 15},
+    "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 100, "strength": 10},
+    "PIG": {"name": "Archer", "sprite": (0, 0), "vitality": 100, "strength": 5},
+    "WASP": {"name": "Wasp", "sprite": (4, 0), "vitality": 125, "strength": 10},
+    "GHOST": {"name": "Ghost", "sprite": (4, 3), "vitality": 150, "strength": 15},
 }
 item_infos = {
     "TRIDENT": {
@@ -17,13 +18,51 @@ item_infos = {
         "sprite": (8, 9),
         "item_type": ItemType.WEAPON,
         "strength": 10,
-        "hp": 0,
+        "vitality": 0,
     },
     "ANVIL": {
         "name": "Anvil",
         "sprite": (9, 10),
         "item_type": ItemType.WEAPON,
         "strength": 40,
-        "hp": 0,
+        "vitality": 0,
     },
 }
+
+
+@dataclass
+class CharacterInfo:
+    name: str
+    sprite: tuple
+    vitality: int
+    strength: int
+
+
+@dataclass
+class ItemInfo:
+    name: str
+    sprite: tuple
+    item_type: int
+    vitality: int
+    strength: int
+
+
+def get_item_info(identifier):
+    info = item_infos[identifier]
+    return ItemInfo(
+        name=info["name"],
+        sprite=info["sprite"],
+        item_type=info["item_type"],
+        strength=info["strength"],
+        vitality=info["vitality"],
+    )
+
+
+def get_character_info(identifier):
+    info = character_infos[identifier]
+    return CharacterInfo(
+        name=info["name"],
+        sprite=info["sprite"],
+        strength=info["strength"],
+        vitality=info["vitality"],
+    )

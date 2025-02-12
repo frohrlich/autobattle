@@ -1,7 +1,7 @@
 import pygame as pg
 
 from character import colorkey
-from data.data import item_infos
+from data.data import get_item_info
 from utils.utils import dogica_bold_path
 from utils.utils import dogica_path
 from utils.utils import draw_borders
@@ -13,13 +13,13 @@ class Item(pg.sprite.Sprite):
     scale = 4
 
     def __init__(self, spritesheet, item_type):
-        self.item_info = item_infos[item_type]
+        self.item_info = get_item_info(item_type)
         pg.sprite.Sprite.__init__(self)
         self.spritesheet = spritesheet
-        self.sprite = self.item_info["sprite"]
-        self.item_type = self.item_info["item_type"]
-        self.strength = self.item_info["strength"]
-        self.hp = self.item_info["hp"]
+        self.sprite = self.item_info.sprite
+        self.item_type = self.item_info.item_type
+        self.strength = self.item_info.strength
+        self.hp = self.item_info.vitality
 
         image, rect = spritesheet.image_at_index(self.sprite, colorkey)
 
@@ -43,16 +43,14 @@ class Item(pg.sprite.Sprite):
         height = margin_y
         width = margin_x
 
-        text_str = font.render(
-            f"strength:{self.item_info['strength']}", True, text_color
-        )
+        text_str = font.render(f"strength:{self.item_info.strength}", True, text_color)
         text_str_rect = text_str.get_rect()
         width = max(width, text_str_rect.width)
         height += text_str_rect.height + margin_y
         text_str_rect.bottom = self.rect.top - margin_y
         text_str_rect.left = self.rect.right + margin_x
 
-        text_hp = font.render(f"health:{self.item_info['hp']}", True, text_color)
+        text_hp = font.render(f"vitality:{self.item_info.vitality}", True, text_color)
         text_hp_rect = text_hp.get_rect()
         width = max(width, text_hp_rect.width)
         text_hp_rect.bottom = self.rect.top - height
@@ -60,7 +58,7 @@ class Item(pg.sprite.Sprite):
         height += text_hp_rect.height + margin_y
 
         height += margin_y
-        text_name = font_bold.render(self.item_info["name"], True, text_color)
+        text_name = font_bold.render(self.item_info.name, True, text_color)
         text_name_rect = text_name.get_rect()
         width = max(width, text_name_rect.width)
         text_name_rect.bottom = self.rect.top - height
