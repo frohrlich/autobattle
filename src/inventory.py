@@ -168,8 +168,8 @@ class Inventory:
             else:
                 for slot in self.slots:
                     if (
-                        slot.rect.collidepoint(pos)
-                        and slot.item_type == self.dragged_item.item_type
+                        slot.item_type == self.dragged_item.item_type
+                        and slot.rect.collidepoint(pos)
                     ):
                         if slot.item is not None:
                             self.move_item_from_slot_to_inventory(slot)

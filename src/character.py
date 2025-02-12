@@ -33,13 +33,17 @@ class Character(pg.sprite.Sprite):
         else:
             use_sprite = (base_sprite[0] + 2, base_sprite[1])
 
-        image, rect = spritesheet.image_at_index(use_sprite, colorkey)
+        image_still, rect = spritesheet.image_at_index(use_sprite, colorkey)
+        image_moving, _ = spritesheet.image_at_index(
+            (use_sprite[0], use_sprite[1] + 1), colorkey
+        )
 
-        size = image.get_size()
+        size = image_still.get_size()
         size = (size[0] * self.scale, size[1] * self.scale)
-        image = pg.transform.scale(image, size)
+        self.image_still = pg.transform.scale(image_still, size)
+        self.image_moving = pg.transform.scale(image_moving, size)
 
-        self.image, self.rect = image, image.get_rect()
+        self.image, self.rect = self.image_still, self.image_still.get_rect()
         self.rect.centerx, self.rect.centery = position
         self.initial_position = position
 
@@ -73,9 +77,11 @@ class Character(pg.sprite.Sprite):
             return
         # move towards enemy
         elif not self.returning and abs(dx) > 3:
+            self.image = self.image_moving
             self.rect.centerx += direction * self.animation_speed
         # when reaching limit, start returning to initial position
         else:
+            self.image = self.image_still
             self.returning = True
             self.rect.centerx -= direction * self.animation_speed
 
