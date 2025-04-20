@@ -212,8 +212,6 @@ def get_random_item_identifier_by_quality(quality):
 
 
 def get_drop_rate_by_quality(quality):
-    if sum(drop_rates.values()) != 100:
-        raise RuntimeError("Drop rates do not equal to 100")
     for key, value in drop_rates.items():
         if key == quality.name:
             return value
