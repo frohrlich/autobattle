@@ -1,3 +1,4 @@
+import math
 import os
 import random
 import sys
@@ -45,12 +46,12 @@ def main():
     # the enemies we will have to fight in successive battles
     enemy_types = ("PIG", "WASP", "GHOST")
     # initialize first battle between our player and the first enemy of the list
-    battle_index = 0
+    score = 0
     enemy_position = (screen.get_width() * 3 / 8, screen.get_height() / 2)
     current_enemy = create_character(
         screen,
         spritesheet,
-        enemy_types[battle_index],
+        random.choice(enemy_types),
         False,
         enemy_position,
     )
@@ -95,26 +96,24 @@ def main():
 
         if battle.has_ended():
             battle.stop()
-            battle_index += 1
-            is_won = battle.is_won()
-            if is_won and battle_index < len(enemy_types):
-                # go to next battle
+            if not ended and battle.is_won():
+                score += 1
                 drop_random_item(spritesheet, inventory)
-                current_enemy = create_character(
+                player.hp = player.max_hp
+                current_enemy = create_enemy(
                     screen,
                     spritesheet,
-                    enemy_types[battle_index],
-                    False,
+                    random.choice(enemy_types),
                     enemy_position,
+                    score,
                 )
                 battle = Battle([player, current_enemy])
                 start_battle_button.on_click_function = battle.start
             else:
-                # if battle lost or won last battle, end game
-                display_end_screen(screen, is_won)
+                display_end_screen(screen, score)
                 if not ended:
                     ended = True
-                    pg.time.set_timer(pg.QUIT, 1000)
+                    pg.time.set_timer(pg.QUIT, 1500)
 
         pg.display.flip()
 
@@ -125,19 +124,32 @@ def is_on_battle_side(pos, background):
     return pos[0] < background.get_width() / 2
 
 
-def display_end_screen(screen, is_won):
+def display_end_screen(screen, score):
     # dark overlay
     background = pg.Surface(screen.get_size())
     background = background.convert()
     background.fill((0, 0, 0))
     background.set_alpha(220)
     screen.blit(background, (0, 0))
+
     # end text
-    font = pg.font.Font(dogica_path, 64)
-    text_str = "You Win!" if is_won else "Game Over"
-    text = font.render(text_str, True, (255, 255, 255))
+    font_size = 64
+    font = pg.font.Font(dogica_path, font_size)
+    font_color = (255, 255, 255)
+
+    text_str = "Game Over"
+    text = font.render(text_str, True, font_color)
     textpos = text.get_rect(
-        centerx=screen.get_width() / 2, centery=screen.get_height() / 2
+        centerx=screen.get_width() / 2,
+        centery=screen.get_height() / 2 - font_size / 2 - 10,
+    )
+    screen.blit(text, textpos)
+
+    text_str = f"You defeated {score} enemies!"
+    text = font.render(text_str, True, font_color)
+    textpos = text.get_rect(
+        centerx=screen.get_width() / 2,
+        centery=screen.get_height() / 2 + font_size / 2 + 10,
     )
     screen.blit(text, textpos)
 
@@ -151,23 +163,6 @@ def create_background(screen):
 
 
 def initialize_inventory(spritesheet, screen, player):
-    # common_sword = Item(spritesheet, "COMMON_SWORD")
-    # uncommon_sword = Item(spritesheet, "UNCOMMON_SWORD")
-    # rare_sword = Item(spritesheet, "RARE_SWORD")
-    # epic_sword = Item(spritesheet, "EPIC_SWORD")
-    # common_shirt = Item(spritesheet, "COMMON_SHIRT")
-    # uncommon_shirt = Item(spritesheet, "UNCOMMON_SHIRT")
-    # rare_shirt = Item(spritesheet, "RARE_SHIRT")
-    # epic_shirt = Item(spritesheet, "EPIC_SHIRT")
-    # common_hat = Item(spritesheet, "COMMON_HAT")
-    # uncommon_hat = Item(spritesheet, "UNCOMMON_HAT")
-    # rare_hat = Item(spritesheet, "RARE_HAT")
-    # epic_hat = Item(spritesheet, "EPIC_HAT")
-    # common_boots = Item(spritesheet, "COMMON_BOOTS")
-    # uncommon_boots = Item(spritesheet, "UNCOMMON_BOOTS")
-    # rare_boots = Item(spritesheet, "RARE_BOOTS")
-    # epic_boots = Item(spritesheet, "EPIC_BOOTS")
-
     weapon_slot = Slot(screen, ItemType.WEAPON)
     shirt_slot = Slot(screen, ItemType.SHIRT)
     hat_slot = Slot(screen, ItemType.HAT)
@@ -177,22 +172,6 @@ def initialize_inventory(spritesheet, screen, player):
         screen,
         player,
         [weapon_slot, shirt_slot, hat_slot, boot_slot],
-        # common_sword,
-        # uncommon_sword,
-        # rare_sword,
-        # epic_sword,
-        # common_shirt,
-        # uncommon_shirt,
-        # rare_shirt,
-        # epic_shirt,
-        # common_hat,
-        # uncommon_hat,
-        # rare_hat,
-        # epic_hat,
-        # common_boots,
-        # uncommon_boots,
-        # rare_boots,
-        # epic_boots,
     )
     return inventory
 
@@ -207,6 +186,16 @@ def create_character(screen, spritesheet, character_type, is_ally, position):
         character_info.vitality,
         character_info.strength,
     )
+
+
+def create_enemy(screen, spritesheet, character_type, position, score):
+    enemy = create_character(screen, spritesheet, character_type, False, position)
+
+    enemy.max_hp = math.floor(enemy.max_hp * (1 + score * 0.1))
+    enemy.hp = enemy.max_hp
+    enemy.strength = math.floor(enemy.strength * (1 + score * 0.1))
+
+    return enemy
 
 
 def draw_layout(background, screen):

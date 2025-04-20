@@ -24,7 +24,7 @@ drop_rates = {
     "EPIC": 5,
 }
 character_infos = {
-    "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 100, "strength": 100},
+    "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 150, "strength": 20},
     "PIG": {"name": "Archer", "sprite": (0, 0), "vitality": 100, "strength": 5},
     "WASP": {"name": "Wasp", "sprite": (4, 0), "vitality": 125, "strength": 10},
     "GHOST": {"name": "Ghost", "sprite": (4, 3), "vitality": 150, "strength": 15},
