@@ -106,10 +106,8 @@ class Item(pg.sprite.Sprite):
                 text_str_rect.left = left
 
         if rect.top <= 0:
+            offset = self.rect.bottom - rect.top
             rect.top = self.rect.bottom
-            offset = (
-                (self.rect.top - text_name_rect.bottom) * 2 + margin_y + border_width
-            )
             text_name_rect.y += offset
             text_type_rect.y += offset
             if self.item_info.vitality:
