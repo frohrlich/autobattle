@@ -47,19 +47,25 @@ class Item(pg.sprite.Sprite):
         height = margin_y
         width = margin_x
         # strength
-        text_str = font.render(f"strength: {self.item_info.strength}", True, text_color)
-        text_str_rect = text_str.get_rect()
-        width = max(width, text_str_rect.width)
-        height += text_str_rect.height + margin_y
-        text_str_rect.bottom = self.rect.top - margin_y
-        text_str_rect.left = self.rect.right + margin_x
+        if self.item_info.strength:
+            text_str = font.render(
+                f"strength: {self.item_info.strength}", True, text_color
+            )
+            text_str_rect = text_str.get_rect()
+            width = max(width, text_str_rect.width)
+            height += text_str_rect.height + margin_y
+            text_str_rect.bottom = self.rect.top - margin_y
+            text_str_rect.left = self.rect.right + margin_x
         # vitality
-        text_hp = font.render(f"vitality: {self.item_info.vitality}", True, text_color)
-        text_hp_rect = text_hp.get_rect()
-        width = max(width, text_hp_rect.width)
-        text_hp_rect.bottom = self.rect.top - height
-        text_hp_rect.left = self.rect.right + margin_x
-        height += text_hp_rect.height + margin_y
+        if self.item_info.vitality:
+            text_hp = font.render(
+                f"vitality: {self.item_info.vitality}", True, text_color
+            )
+            text_hp_rect = text_hp.get_rect()
+            width = max(width, text_hp_rect.width)
+            text_hp_rect.bottom = self.rect.top - height
+            text_hp_rect.left = self.rect.right + margin_x
+            height += text_hp_rect.height + margin_y
         # item type
         text_type = font_small.render(
             self.item_type.name.capitalize(), True, text_small_color
@@ -91,8 +97,10 @@ class Item(pg.sprite.Sprite):
             left = self.rect.left - width + margin_x
             text_name_rect.left = left
             text_type_rect.left = left
-            text_hp_rect.left = left
-            text_str_rect.left = left
+            if self.item_info.vitality:
+                text_hp_rect.left = left
+            if self.item_info.strength:
+                text_str_rect.left = left
 
         if rect.top <= 0:
             rect.top = self.rect.bottom
@@ -101,8 +109,10 @@ class Item(pg.sprite.Sprite):
             )
             text_name_rect.y += offset
             text_type_rect.y += offset
-            text_hp_rect.y += offset
-            text_str_rect.y += offset
+            if self.item_info.vitality:
+                text_hp_rect.y += offset
+            if self.item_info.strength:
+                text_str_rect.y += offset
 
         rect = pg.draw.rect(screen, "#00aa00", rect)
 
@@ -115,10 +125,12 @@ class Item(pg.sprite.Sprite):
             border_width,
             (100, 100, 100),
         )
-        screen.blit(text_str, text_str_rect)
-        screen.blit(text_hp, text_hp_rect)
         screen.blit(text_type, text_type_rect)
         screen.blit(text_name, text_name_rect)
+        if self.item_info.strength:
+            screen.blit(text_str, text_str_rect)
+        if self.item_info.vitality:
+            screen.blit(text_hp, text_hp_rect)
 
 
 class Inventory:
