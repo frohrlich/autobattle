@@ -1,6 +1,5 @@
 import pygame as pg
 
-from character import colorkey
 from data.data import ItemType
 from data.data import Quality
 from data.data import get_item_info
@@ -24,7 +23,7 @@ class Item(pg.sprite.Sprite):
         self.strength = self.item_info.strength
         self.vitality = self.item_info.vitality
 
-        image, rect = spritesheet.image_at_index(self.sprite, colorkey)
+        image, rect = spritesheet.image_at_index(self.sprite)
 
         size = image.get_size()
         size = (size[0] * self.scale, size[1] * self.scale)

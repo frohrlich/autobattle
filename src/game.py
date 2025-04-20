@@ -99,7 +99,7 @@ def main():
             is_won = battle.is_won()
             if is_won and battle_index < len(enemy_types):
                 # go to next battle
-                drop_new_item(spritesheet, inventory)
+                drop_random_item(spritesheet, inventory)
                 current_enemy = create_character(
                     screen,
                     spritesheet,
@@ -258,7 +258,7 @@ def create_start_battle_button(screen, battle):
     )
 
 
-def drop_new_item(spritesheet, inventory):
+def drop_random_item(spritesheet, inventory):
     dice_roll = random.uniform(0, 100)
 
     if dice_roll < get_drop_rate_by_quality(Quality.EPIC):

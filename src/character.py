@@ -1,7 +1,5 @@
 import pygame as pg
 
-colorkey = (255, 0, 220)
-
 
 class Character(pg.sprite.Sprite):
     """Represents a character in battle."""
@@ -33,9 +31,9 @@ class Character(pg.sprite.Sprite):
         else:
             use_sprite = (base_sprite[0] + 2, base_sprite[1])
 
-        image_still, rect = spritesheet.image_at_index(use_sprite, colorkey)
+        image_still, rect = spritesheet.image_at_index(use_sprite, colorkey=-1)
         image_moving, _ = spritesheet.image_at_index(
-            (use_sprite[0], use_sprite[1] + 1), colorkey
+            (use_sprite[0], use_sprite[1] + 1), colorkey=-1
         )
 
         size = image_still.get_size()
