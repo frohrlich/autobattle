@@ -263,7 +263,7 @@ class Slot:
             case ItemType.WEAPON:
                 self.base_x = self.screen.get_width() / 2 + border_x
                 self.base_y = border_y
-            case ItemType.CAPE:
+            case ItemType.SHIRT:
                 self.base_x = self.screen.get_width() - self.size - border_x
                 self.base_y = border_y
             case ItemType.HAT:

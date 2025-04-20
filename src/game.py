@@ -146,24 +146,40 @@ def create_background(screen):
 
 
 def initialize_inventory(spritesheet, screen, player):
-    trident = Item(spritesheet, "TRIDENT")
-    anvil = Item(spritesheet, "ANVIL")
-    net_cape = Item(spritesheet, "NET_CAPE")
-    space_helmet = Item(spritesheet, "SPACE_HELMET")
-    bee_boots = Item(spritesheet, "BEE_BOOTS")
+    basic_sword = Item(spritesheet, "BASIC_SWORD")
+    rare_sword = Item(spritesheet, "RARE_SWORD")
+    epic_sword = Item(spritesheet, "EPIC_SWORD")
+    basic_shirt = Item(spritesheet, "BASIC_SHIRT")
+    rare_shirt = Item(spritesheet, "RARE_SHIRT")
+    epic_shirt = Item(spritesheet, "EPIC_SHIRT")
+    basic_hat = Item(spritesheet, "BASIC_HAT")
+    rare_hat = Item(spritesheet, "RARE_HAT")
+    epic_hat = Item(spritesheet, "EPIC_HAT")
+    basic_boots = Item(spritesheet, "BASIC_BOOTS")
+    rare_boots = Item(spritesheet, "RARE_BOOTS")
+    epic_boots = Item(spritesheet, "EPIC_BOOTS")
+
     weapon_slot = Slot(screen, ItemType.WEAPON)
-    cape_slot = Slot(screen, ItemType.CAPE)
+    shirt_slot = Slot(screen, ItemType.SHIRT)
     hat_slot = Slot(screen, ItemType.HAT)
     boot_slot = Slot(screen, ItemType.BOOTS)
+
     inventory = Inventory(
         screen,
         player,
-        [weapon_slot, cape_slot, hat_slot, boot_slot],
-        trident,
-        anvil,
-        net_cape,
-        space_helmet,
-        bee_boots,
+        [weapon_slot, shirt_slot, hat_slot, boot_slot],
+        basic_sword,
+        rare_sword,
+        epic_sword,
+        basic_shirt,
+        rare_shirt,
+        epic_shirt,
+        basic_hat,
+        rare_hat,
+        epic_hat,
+        basic_boots,
+        rare_boots,
+        epic_boots,
     )
     return inventory
 
