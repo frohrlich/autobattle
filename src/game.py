@@ -146,16 +146,20 @@ def create_background(screen):
 
 
 def initialize_inventory(spritesheet, screen, player):
-    basic_sword = Item(spritesheet, "BASIC_SWORD")
+    common_sword = Item(spritesheet, "COMMON_SWORD")
+    uncommon_sword = Item(spritesheet, "UNCOMMON_SWORD")
     rare_sword = Item(spritesheet, "RARE_SWORD")
     epic_sword = Item(spritesheet, "EPIC_SWORD")
-    basic_shirt = Item(spritesheet, "BASIC_SHIRT")
+    common_shirt = Item(spritesheet, "COMMON_SHIRT")
+    uncommon_shirt = Item(spritesheet, "UNCOMMON_SHIRT")
     rare_shirt = Item(spritesheet, "RARE_SHIRT")
     epic_shirt = Item(spritesheet, "EPIC_SHIRT")
-    basic_hat = Item(spritesheet, "BASIC_HAT")
+    common_hat = Item(spritesheet, "COMMON_HAT")
+    uncommon_hat = Item(spritesheet, "UNCOMMON_HAT")
     rare_hat = Item(spritesheet, "RARE_HAT")
     epic_hat = Item(spritesheet, "EPIC_HAT")
-    basic_boots = Item(spritesheet, "BASIC_BOOTS")
+    common_boots = Item(spritesheet, "COMMON_BOOTS")
+    uncommon_boots = Item(spritesheet, "UNCOMMON_BOOTS")
     rare_boots = Item(spritesheet, "RARE_BOOTS")
     epic_boots = Item(spritesheet, "EPIC_BOOTS")
 
@@ -168,16 +172,20 @@ def initialize_inventory(spritesheet, screen, player):
         screen,
         player,
         [weapon_slot, shirt_slot, hat_slot, boot_slot],
-        basic_sword,
+        common_sword,
+        uncommon_sword,
         rare_sword,
         epic_sword,
-        basic_shirt,
+        common_shirt,
+        uncommon_shirt,
         rare_shirt,
         epic_shirt,
-        basic_hat,
+        common_hat,
+        uncommon_hat,
         rare_hat,
         epic_hat,
-        basic_boots,
+        common_boots,
+        uncommon_boots,
         rare_boots,
         epic_boots,
     )
