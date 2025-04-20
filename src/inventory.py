@@ -198,9 +198,12 @@ class Inventory:
         return next((slot for slot in self.slots if slot.item == item), None)
 
     def put_item_inside_inventory(self, index, item):
-        self.base_x = self.screen.get_width() / 2 + 20 + index * 70
-        base_y = self.screen.get_height() / 2 + 70
         image_size = 64
+        margin = 10
+
+        box_size = image_size + margin
+        self.base_x = self.screen.get_width() / 2 + 20 + (index % 8) * box_size
+        base_y = self.screen.get_height() / 2 + (index // 8 + 1) * box_size
         item.rect = pg.Rect(
             self.base_x,
             base_y,
