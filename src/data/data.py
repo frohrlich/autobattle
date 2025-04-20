@@ -9,6 +9,13 @@ class ItemType(Enum):
     BOOTS = 4
 
 
+class Quality(Enum):
+    COMMON = 1
+    UNCOMMON = 2
+    RARE = 3
+    EPIC = 4
+
+
 character_infos = {
     "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 100, "strength": 10},
     "PIG": {"name": "Archer", "sprite": (0, 0), "vitality": 100, "strength": 5},
@@ -22,6 +29,7 @@ item_infos = {
         "item_type": ItemType.WEAPON,
         "strength": 4,
         "vitality": 0,
+        "quality": Quality.COMMON,
     },
     "UNCOMMON_SWORD": {
         "name": "Uncommon sword",
@@ -29,6 +37,7 @@ item_infos = {
         "item_type": ItemType.WEAPON,
         "strength": 10,
         "vitality": 0,
+        "quality": Quality.UNCOMMON,
     },
     "RARE_SWORD": {
         "name": "Rare sword",
@@ -36,6 +45,7 @@ item_infos = {
         "item_type": ItemType.WEAPON,
         "strength": 20,
         "vitality": 0,
+        "quality": Quality.RARE,
     },
     "EPIC_SWORD": {
         "name": "Epic sword",
@@ -43,6 +53,7 @@ item_infos = {
         "item_type": ItemType.WEAPON,
         "strength": 50,
         "vitality": 0,
+        "quality": Quality.EPIC,
     },
     "COMMON_SHIRT": {
         "name": "Common shirt",
@@ -50,6 +61,7 @@ item_infos = {
         "item_type": ItemType.SHIRT,
         "strength": 0,
         "vitality": 5,
+        "quality": Quality.COMMON,
     },
     "UNCOMMON_SHIRT": {
         "name": "Uncommon shirt",
@@ -57,6 +69,7 @@ item_infos = {
         "item_type": ItemType.SHIRT,
         "strength": 0,
         "vitality": 15,
+        "quality": Quality.UNCOMMON,
     },
     "RARE_SHIRT": {
         "name": "Rare shirt",
@@ -64,6 +77,7 @@ item_infos = {
         "item_type": ItemType.SHIRT,
         "strength": 0,
         "vitality": 30,
+        "quality": Quality.RARE,
     },
     "EPIC_SHIRT": {
         "name": "Epic shirt",
@@ -71,6 +85,7 @@ item_infos = {
         "item_type": ItemType.SHIRT,
         "strength": 0,
         "vitality": 100,
+        "quality": Quality.EPIC,
     },
     "COMMON_HAT": {
         "name": "Common hat",
@@ -78,6 +93,7 @@ item_infos = {
         "item_type": ItemType.HAT,
         "strength": 0,
         "vitality": 2,
+        "quality": Quality.COMMON,
     },
     "UNCOMMON_HAT": {
         "name": "Uncommon hat",
@@ -85,6 +101,7 @@ item_infos = {
         "item_type": ItemType.HAT,
         "strength": 0,
         "vitality": 10,
+        "quality": Quality.UNCOMMON,
     },
     "RARE_HAT": {
         "name": "Rare hat",
@@ -92,6 +109,7 @@ item_infos = {
         "item_type": ItemType.HAT,
         "strength": 0,
         "vitality": 20,
+        "quality": Quality.RARE,
     },
     "EPIC_HAT": {
         "name": "Epic hat",
@@ -99,6 +117,7 @@ item_infos = {
         "item_type": ItemType.HAT,
         "strength": 0,
         "vitality": 60,
+        "quality": Quality.EPIC,
     },
     "COMMON_BOOTS": {
         "name": "Common boots",
@@ -106,6 +125,7 @@ item_infos = {
         "item_type": ItemType.BOOTS,
         "strength": 0,
         "vitality": 1,
+        "quality": Quality.COMMON,
     },
     "UNCOMMON_BOOTS": {
         "name": "Uncommon boots",
@@ -113,6 +133,7 @@ item_infos = {
         "item_type": ItemType.BOOTS,
         "strength": 0,
         "vitality": 5,
+        "quality": Quality.UNCOMMON,
     },
     "RARE_BOOTS": {
         "name": "Rare boots",
@@ -120,6 +141,7 @@ item_infos = {
         "item_type": ItemType.BOOTS,
         "strength": 0,
         "vitality": 10,
+        "quality": Quality.RARE,
     },
     "EPIC_BOOTS": {
         "name": "Epic boots",
@@ -127,6 +149,7 @@ item_infos = {
         "item_type": ItemType.BOOTS,
         "strength": 0,
         "vitality": 40,
+        "quality": Quality.EPIC,
     },
 }
 
@@ -144,6 +167,7 @@ class ItemInfo:
     name: str
     sprite: tuple
     item_type: ItemType
+    quality: Quality
     vitality: int
     strength: int
 
@@ -154,6 +178,7 @@ def get_item_info(identifier):
         name=info["name"],
         sprite=info["sprite"],
         item_type=info["item_type"],
+        quality=info["quality"],
         strength=info["strength"],
         vitality=info["vitality"],
     )

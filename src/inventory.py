@@ -2,6 +2,7 @@ import pygame as pg
 
 from character import colorkey
 from data.data import ItemType
+from data.data import Quality
 from data.data import get_item_info
 from utils.utils import dogica_bold_path
 from utils.utils import dogica_path
@@ -19,6 +20,7 @@ class Item(pg.sprite.Sprite):
         self.spritesheet = spritesheet
         self.sprite = self.item_info.sprite
         self.item_type = self.item_info.item_type
+        self.quality = self.item_info.quality
         self.strength = self.item_info.strength
         self.vitality = self.item_info.vitality
 
@@ -41,6 +43,7 @@ class Item(pg.sprite.Sprite):
         font_small = pg.font.Font(dogica_path, 12)
         text_color = (25, 25, 25)
         text_small_color = (50, 50, 50)
+        text_name_color = self.get_quality_color()
         margin_y = 8
         margin_x = 8
         border_width = 3
@@ -76,7 +79,7 @@ class Item(pg.sprite.Sprite):
         text_type_rect.left = self.rect.right + margin_x
         height += text_type_rect.height + margin_y
         # name
-        text_name = font_bold.render(self.item_info.name, True, text_color)
+        text_name = font_bold.render(self.item_info.name, True, text_name_color)
         text_name_rect = text_name.get_rect()
         width = max(width, text_name_rect.width)
         text_name_rect.bottom = self.rect.top - height
@@ -131,6 +134,19 @@ class Item(pg.sprite.Sprite):
             screen.blit(text_str, text_str_rect)
         if self.item_info.vitality:
             screen.blit(text_hp, text_hp_rect)
+
+    def get_quality_color(self):
+        match self.quality:
+            case Quality.COMMON:
+                return "#FFFFFF"
+            case Quality.UNCOMMON:
+                return "#1eff00"
+            case Quality.RARE:
+                return "#0070dd"
+            case Quality.EPIC:
+                return "#a335ee"
+            case _:
+                raise RuntimeError("Invalid item quality")
 
 
 class Inventory:
