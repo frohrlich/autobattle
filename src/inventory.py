@@ -14,8 +14,8 @@ class Item(pg.sprite.Sprite):
 
     scale = 4
 
-    def __init__(self, spritesheet, item_type):
-        self.item_info = get_item_info(item_type)
+    def __init__(self, spritesheet, identifier):
+        self.item_info = get_item_info(identifier)
         pg.sprite.Sprite.__init__(self)
         self.spritesheet = spritesheet
         self.sprite = self.item_info.sprite

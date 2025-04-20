@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 
 import pygame as pg
@@ -6,7 +7,10 @@ import pygame as pg
 from battle import Battle
 from character import Character
 from data.data import ItemType
+from data.data import Quality
 from data.data import get_character_info
+from data.data import get_drop_rate_by_quality
+from data.data import get_random_item_identifier_by_quality
 from inventory import Inventory
 from inventory import Item
 from inventory import Slot
@@ -95,6 +99,7 @@ def main():
             is_won = battle.is_won()
             if is_won and battle_index < len(enemy_types):
                 # go to next battle
+                drop_new_item(spritesheet, inventory)
                 current_enemy = create_character(
                     screen,
                     spritesheet,
@@ -146,22 +151,22 @@ def create_background(screen):
 
 
 def initialize_inventory(spritesheet, screen, player):
-    common_sword = Item(spritesheet, "COMMON_SWORD")
-    uncommon_sword = Item(spritesheet, "UNCOMMON_SWORD")
-    rare_sword = Item(spritesheet, "RARE_SWORD")
-    epic_sword = Item(spritesheet, "EPIC_SWORD")
-    common_shirt = Item(spritesheet, "COMMON_SHIRT")
-    uncommon_shirt = Item(spritesheet, "UNCOMMON_SHIRT")
-    rare_shirt = Item(spritesheet, "RARE_SHIRT")
-    epic_shirt = Item(spritesheet, "EPIC_SHIRT")
-    common_hat = Item(spritesheet, "COMMON_HAT")
-    uncommon_hat = Item(spritesheet, "UNCOMMON_HAT")
-    rare_hat = Item(spritesheet, "RARE_HAT")
-    epic_hat = Item(spritesheet, "EPIC_HAT")
-    common_boots = Item(spritesheet, "COMMON_BOOTS")
-    uncommon_boots = Item(spritesheet, "UNCOMMON_BOOTS")
-    rare_boots = Item(spritesheet, "RARE_BOOTS")
-    epic_boots = Item(spritesheet, "EPIC_BOOTS")
+    # common_sword = Item(spritesheet, "COMMON_SWORD")
+    # uncommon_sword = Item(spritesheet, "UNCOMMON_SWORD")
+    # rare_sword = Item(spritesheet, "RARE_SWORD")
+    # epic_sword = Item(spritesheet, "EPIC_SWORD")
+    # common_shirt = Item(spritesheet, "COMMON_SHIRT")
+    # uncommon_shirt = Item(spritesheet, "UNCOMMON_SHIRT")
+    # rare_shirt = Item(spritesheet, "RARE_SHIRT")
+    # epic_shirt = Item(spritesheet, "EPIC_SHIRT")
+    # common_hat = Item(spritesheet, "COMMON_HAT")
+    # uncommon_hat = Item(spritesheet, "UNCOMMON_HAT")
+    # rare_hat = Item(spritesheet, "RARE_HAT")
+    # epic_hat = Item(spritesheet, "EPIC_HAT")
+    # common_boots = Item(spritesheet, "COMMON_BOOTS")
+    # uncommon_boots = Item(spritesheet, "UNCOMMON_BOOTS")
+    # rare_boots = Item(spritesheet, "RARE_BOOTS")
+    # epic_boots = Item(spritesheet, "EPIC_BOOTS")
 
     weapon_slot = Slot(screen, ItemType.WEAPON)
     shirt_slot = Slot(screen, ItemType.SHIRT)
@@ -172,22 +177,22 @@ def initialize_inventory(spritesheet, screen, player):
         screen,
         player,
         [weapon_slot, shirt_slot, hat_slot, boot_slot],
-        common_sword,
-        uncommon_sword,
-        rare_sword,
-        epic_sword,
-        common_shirt,
-        uncommon_shirt,
-        rare_shirt,
-        epic_shirt,
-        common_hat,
-        uncommon_hat,
-        rare_hat,
-        epic_hat,
-        common_boots,
-        uncommon_boots,
-        rare_boots,
-        epic_boots,
+        # common_sword,
+        # uncommon_sword,
+        # rare_sword,
+        # epic_sword,
+        # common_shirt,
+        # uncommon_shirt,
+        # rare_shirt,
+        # epic_shirt,
+        # common_hat,
+        # uncommon_hat,
+        # rare_hat,
+        # epic_hat,
+        # common_boots,
+        # uncommon_boots,
+        # rare_boots,
+        # epic_boots,
     )
     return inventory
 
@@ -251,6 +256,25 @@ def create_start_battle_button(screen, battle):
         "Fight!",
         battle.start,
     )
+
+
+def drop_new_item(spritesheet, inventory):
+    dice_roll = random.uniform(0, 100)
+
+    if dice_roll < get_drop_rate_by_quality(Quality.EPIC):
+        identifier = get_random_item_identifier_by_quality(Quality.EPIC)
+    elif dice_roll < get_drop_rate_by_quality(Quality.EPIC) + get_drop_rate_by_quality(
+        Quality.RARE
+    ):
+        identifier = get_random_item_identifier_by_quality(Quality.RARE)
+    elif dice_roll < get_drop_rate_by_quality(Quality.EPIC) + get_drop_rate_by_quality(
+        Quality.RARE
+    ) + get_drop_rate_by_quality(Quality.UNCOMMON):
+        identifier = get_random_item_identifier_by_quality(Quality.UNCOMMON)
+    else:
+        identifier = get_random_item_identifier_by_quality(Quality.COMMON)
+
+    inventory.add_item(Item(spritesheet, identifier))
 
 
 if __name__ == "__main__":

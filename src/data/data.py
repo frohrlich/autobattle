@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass
 from enum import Enum
 
@@ -16,8 +17,14 @@ class Quality(Enum):
     EPIC = 4
 
 
+drop_rates = {
+    "COMMON": 65,
+    "UNCOMMON": 20,
+    "RARE": 10,
+    "EPIC": 5,
+}
 character_infos = {
-    "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 100, "strength": 10},
+    "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 100, "strength": 100},
     "PIG": {"name": "Archer", "sprite": (0, 0), "vitality": 100, "strength": 5},
     "WASP": {"name": "Wasp", "sprite": (4, 0), "vitality": 125, "strength": 10},
     "GHOST": {"name": "Ghost", "sprite": (4, 3), "vitality": 150, "strength": 15},
@@ -192,3 +199,22 @@ def get_character_info(identifier):
         strength=info["strength"],
         vitality=info["vitality"],
     )
+
+
+def get_random_item_identifier_by_quality(quality):
+    identifiers = []
+    for key, value in item_infos.items():
+        if value["quality"] == quality:
+            identifiers.append(key)
+    if identifiers:
+        return random.choice(identifiers)
+    return None
+
+
+def get_drop_rate_by_quality(quality):
+    if sum(drop_rates.values()) != 100:
+        raise RuntimeError("Drop rates do not equal to 100")
+    for key, value in drop_rates.items():
+        if key == quality.name:
+            return value
+    return None
