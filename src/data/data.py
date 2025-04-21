@@ -8,6 +8,7 @@ class ItemType(Enum):
     SHIRT = 2
     HAT = 3
     BOOTS = 4
+    POTION = 5
 
 
 class Quality(Enum):
@@ -31,11 +32,18 @@ prices = {
 }
 character_infos = {
     "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 150, "strength": 20},
-    "PIG": {"name": "Archer", "sprite": (0, 0), "vitality": 100, "strength": 5},
-    "WASP": {"name": "Wasp", "sprite": (4, 0), "vitality": 125, "strength": 10},
-    "GHOST": {"name": "Ghost", "sprite": (4, 3), "vitality": 150, "strength": 15},
+    "PIG": {"name": "Archer", "sprite": (0, 0), "vitality": 50, "strength": 2},
+    "WASP": {"name": "Wasp", "sprite": (4, 0), "vitality": 60, "strength": 5},
+    "GHOST": {"name": "Ghost", "sprite": (4, 3), "vitality": 100, "strength": 10},
 }
 item_infos = {
+    "HEALTH_POTION": {
+        "name": "Health potion",
+        "sprite": (11, 3),
+        "item_type": ItemType.POTION,
+        "health_bonus": 50,
+        "quality": Quality.COMMON,
+    },
     "COMMON_SWORD": {
         "name": "Common sword",
         "sprite": (11, 9),
@@ -181,12 +189,21 @@ class ItemInfo:
     sprite: tuple
     item_type: ItemType
     quality: Quality
-    vitality: int
-    strength: int
+    vitality: int | None = None
+    strength: int | None = None
+    health_bonus: int | None = None
 
 
 def get_item_info(identifier):
     info = item_infos[identifier]
+    if info["item_type"] == ItemType.POTION:
+        return ItemInfo(
+            name=info["name"],
+            sprite=info["sprite"],
+            item_type=info["item_type"],
+            quality=info["quality"],
+            health_bonus=info["health_bonus"],
+        )
     return ItemInfo(
         name=info["name"],
         sprite=info["sprite"],

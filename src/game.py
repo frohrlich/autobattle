@@ -101,7 +101,6 @@ def main():
             if not ended and battle.is_won():
                 score += 1
                 drop_random_item(spritesheet, inventory)
-                player.hp = player.max_hp
                 current_enemy = create_enemy(
                     screen,
                     spritesheet,
@@ -165,6 +164,7 @@ def create_background(screen):
 
 
 def initialize_inventory(spritesheet, screen, player):
+    potion = Item(spritesheet, "HEALTH_POTION")
     weapon_slot = Slot(screen, ItemType.WEAPON)
     shirt_slot = Slot(screen, ItemType.SHIRT)
     hat_slot = Slot(screen, ItemType.HAT)
@@ -175,6 +175,7 @@ def initialize_inventory(spritesheet, screen, player):
         screen,
         player,
         [weapon_slot, shirt_slot, hat_slot, boot_slot],
+        potion,
     )
     return inventory
 

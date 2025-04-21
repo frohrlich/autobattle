@@ -149,3 +149,6 @@ class Character(pg.sprite.Sprite):
             x=x_margin, centery=self.screen.get_height() - font_size / 2 - y_margin
         )
         self.screen.blit(text, textpos)
+
+    def consume_potion(self, potion):
+        self.hp = min(self.hp + potion.health_bonus, self.max_hp)

@@ -24,6 +24,7 @@ class Item(pg.sprite.Sprite):
         self.quality = self.item_info.quality
         self.strength = self.item_info.strength
         self.vitality = self.item_info.vitality
+        self.health_bonus = self.item_info.health_bonus
 
         image, rect = spritesheet.image_at_index(self.sprite)
 
@@ -50,6 +51,16 @@ class Item(pg.sprite.Sprite):
         border_width = 3
         height = margin_y
         width = margin_x
+        # health bonus
+        if self.item_info.health_bonus:
+            text_hp_bonus = font.render(
+                f"+{self.item_info.health_bonus} HP", True, text_color
+            )
+            text_hp_bonus_rect = text_hp_bonus.get_rect()
+            width = max(width, text_hp_bonus_rect.width)
+            height += text_hp_bonus_rect.height + margin_y
+            text_hp_bonus_rect.bottom = self.rect.top - margin_y
+            text_hp_bonus_rect.left = self.rect.right + margin_x
         # strength
         if self.item_info.strength:
             text_str = font.render(
@@ -105,6 +116,8 @@ class Item(pg.sprite.Sprite):
                 text_hp_rect.left = left
             if self.item_info.strength:
                 text_str_rect.left = left
+            if self.item_info.health_bonus:
+                text_hp_bonus_rect.left = left
 
         if rect.top <= 0:
             offset = self.rect.bottom - rect.top
@@ -115,6 +128,8 @@ class Item(pg.sprite.Sprite):
                 text_hp_rect.y += offset
             if self.item_info.strength:
                 text_str_rect.y += offset
+            if self.item_info.health_bonus:
+                text_hp_bonus_rect.y = offset
 
         rect = pg.draw.rect(screen, "#00aa00", rect)
 
@@ -133,6 +148,8 @@ class Item(pg.sprite.Sprite):
             screen.blit(text_str, text_str_rect)
         if self.item_info.vitality:
             screen.blit(text_hp, text_hp_rect)
+        if self.item_info.health_bonus:
+            screen.blit(text_hp_bonus, text_hp_bonus_rect)
 
     def get_quality_color(self):
         match self.quality:
@@ -199,9 +216,19 @@ class Inventory:
                 self.dragged_item = item
 
     def drop_dragged_item(self, pos):
-        """Drop a dragged item from the inventory into a gear slot, and vice versa."""
+        """Drop a dragged item.
+
+        Into a gear slot, the inventory, or the player (for potions).
+        """
         if self.dragged_item is not None:
-            if slot := self.get_slot(self.dragged_item):
+            if (
+                self.dragged_item.item_type == ItemType.POTION
+                and self.player.rect.collidepoint(pos)
+            ):
+                if self.player.hp < self.player.max_hp:
+                    self.player.consume_potion(self.dragged_item)
+                    self.remove_item(self.dragged_item)
+            elif slot := self.get_slot(self.dragged_item):
                 if is_pos_inside_inventory(pos, self.screen):
                     self.move_item_from_slot_to_inventory(slot)
             else:
