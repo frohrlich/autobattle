@@ -71,6 +71,7 @@ def main():
             elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 sys.exit()
             elif event.type == pg.MOUSEBUTTONUP:
+                inventory.shop_button.click(event.pos)
                 if not battle.is_started:
                     start_battle_button.click(event.pos)
                 inventory.drop_dragged_item(event.pos)
@@ -134,7 +135,7 @@ def display_end_screen(screen, score):
     screen.blit(background, (0, 0))
 
     # end text
-    font_size = 64
+    font_size = 48
     font = pg.font.Font(dogica_path, font_size)
     font_color = (255, 255, 255)
 
@@ -170,6 +171,7 @@ def initialize_inventory(spritesheet, screen, player):
     boot_slot = Slot(screen, ItemType.BOOTS)
 
     inventory = Inventory(
+        spritesheet,
         screen,
         player,
         [weapon_slot, shirt_slot, hat_slot, boot_slot],
@@ -244,6 +246,7 @@ def create_start_battle_button(screen, battle):
         screen.get_height() * 3 / 4,
         200,
         80,
+        32,
         "Fight!",
         battle.start,
     )

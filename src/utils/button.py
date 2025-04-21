@@ -12,9 +12,17 @@ class Button:
         centery,
         width,
         height,
+        font_size,
         text,
         on_click_function=None,
+        fill_colors=None,
     ):
+        if fill_colors is None:
+            fill_colors = {
+                "normal": "#00aa00",
+                "hover": "#006600",
+                "pressed": "#003300",
+            }
         self.screen = screen
         self.centerx = centerx
         self.centery = centery
@@ -22,17 +30,13 @@ class Button:
         self.height = height
         self.on_click_function = on_click_function
 
-        self.fill_colors = {
-            "normal": "#00aa00",
-            "hover": "#006600",
-            "pressed": "#003300",
-        }
+        self.fill_colors = fill_colors
 
         self.surface = pg.Surface((self.width, self.height))
         self.rect = pg.Rect(0, 0, self.width, self.height)
         self.rect.center = (centerx, centery)
-        font = pg.font.Font(dogica_path, 32)
-        self.text = font.render(text, True, (0, 0, 0))
+        self.font = pg.font.Font(dogica_path, font_size)
+        self.text = self.font.render(text, True, (0, 0, 0))
 
     def process(self):
         mousePos = pg.mouse.get_pos()
@@ -63,3 +67,6 @@ class Button:
     def click(self, pos):
         if self.rect.collidepoint(pos):
             self.on_click_function()
+
+    def change_text(self, text):
+        self.text = self.font.render(text, True, (0, 0, 0))

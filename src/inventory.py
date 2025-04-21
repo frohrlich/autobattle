@@ -3,6 +3,8 @@ import pygame as pg
 from data.data import ItemType
 from data.data import Quality
 from data.data import get_item_info
+from data.data import get_price_by_quality
+from utils.button import Button
 from utils.utils import dogica_bold_path
 from utils.utils import dogica_path
 from utils.utils import draw_borders
@@ -149,12 +151,17 @@ class Item(pg.sprite.Sprite):
 class Inventory:
     """Represents the inventory and gear slots."""
 
-    def __init__(self, screen, player, slots, *args):
+    gold_image_sprite = (10, 3)
+
+    def __init__(self, spritesheet, screen, player, slots, *args):
+        self.spritesheet = spritesheet
         self.screen = screen
         self.player = player
+        self.gold = 0
         self.items = pg.sprite.RenderPlain(args)
         self.slots = slots
         self.dragged_item = None
+        self.create_shop_button()
         self.refresh_item_positions()
 
     def add_item(self, item):
@@ -170,9 +177,16 @@ class Inventory:
             slot.draw(self.screen)
 
         self.items.draw(self.screen)
-        # dragged item should always be drawn on top
+
+        self.shop_button.process()
+
         if self.dragged_item:
+            self.shop_button.change_text("Sell!")
             self.screen.blit(self.dragged_item.image, self.dragged_item.rect)
+        else:
+            self.shop_button.change_text("Shop")
+
+        self.draw_gold()
 
         # show infobox
         if self.dragged_item is None:
@@ -248,6 +262,56 @@ class Inventory:
     def move_item_from_inventory_to_slot(self, slot, item):
         self.player.add_item(item)
         slot.item = item
+
+    def create_shop_button(self):
+        margin = 10
+        height = 80
+        width = 100
+        self.shop_button = Button(
+            self.screen,
+            self.screen.get_width() - width / 2 - margin,
+            self.screen.get_height() - height / 2 - margin,
+            width,
+            height,
+            24,
+            "Shop",
+            self.sell_item,
+            {
+                "normal": "#aaa200",
+                "hover": "#666400",
+                "pressed": "#333100",
+            },
+        )
+
+    def sell_item(self):
+        if self.dragged_item:
+            self.gold += get_price_by_quality(self.dragged_item.quality)
+            self.remove_item(self.dragged_item)
+            self.dragged_item = None
+
+    def draw_gold(self):
+        margin = 8
+        icon_scale = 2
+
+        gold_image, _ = self.spritesheet.image_at_index(
+            self.gold_image_sprite, colorkey=-1
+        )
+        size = gold_image.get_size()
+        size = (size[0] * icon_scale, size[1] * icon_scale)
+        gold_image = pg.transform.scale(gold_image, size)
+        gold_rect = gold_image.get_rect()
+
+        gold_rect.right = self.shop_button.rect.left - margin
+        gold_rect.centery = self.shop_button.centery
+        self.screen.blit(gold_image, gold_rect)
+
+        font = pg.font.Font(dogica_path, 24)
+        text = font.render(str(self.gold), True, (255, 255, 255))
+        textpos = text.get_rect(
+            right=gold_rect.left - margin,
+            centery=gold_rect.centery,
+        )
+        self.screen.blit(text, textpos)
 
 
 class Slot:
