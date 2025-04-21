@@ -1,5 +1,7 @@
 import pygame as pg
 
+from utils.utils import dogica_path
+
 
 class Character(pg.sprite.Sprite):
     """Represents a character in battle."""
@@ -9,6 +11,7 @@ class Character(pg.sprite.Sprite):
 
     def __init__(
         self,
+        screen,
         spritesheet,
         base_sprite,
         position,
@@ -23,6 +26,7 @@ class Character(pg.sprite.Sprite):
         self.max_hp = base_hp
         self.hp = base_hp
         self.strength = base_strength
+        self.screen = screen
 
         # which sprite to use depending on character facing right or left
         # (allies face right and enemies face left)
@@ -83,27 +87,35 @@ class Character(pg.sprite.Sprite):
             self.returning = True
             self.rect.centerx -= direction * self.animation_speed
 
-    def draw_health_bar(self, screen):
+    def draw_health_bar(self):
+        height = 20
+        margin = 10
         pg.draw.rect(
-            screen,
+            self.screen,
             (255, 0, 0),
             (
                 self.rect.left,
-                self.rect.top - 20,
+                self.rect.top - height - margin,
                 self.rect.width,
-                10,
+                height,
             ),
         )
         pg.draw.rect(
-            screen,
+            self.screen,
             (0, 128, 0),
             (
                 self.rect.left,
-                self.rect.top - 20,
+                self.rect.top - height - margin,
                 self.rect.width * (1 - (self.max_hp - self.hp) / self.max_hp),
-                10,
+                height,
             ),
         )
+        font = pg.font.Font(dogica_path, 16)
+        text = font.render(str(self.hp), True, (200, 200, 200))
+        textpos = text.get_rect(
+            centerx=self.rect.centerx, centery=self.rect.top - height / 2 - margin
+        )
+        self.screen.blit(text, textpos)
 
     def is_dead(self):
         return self.hp <= 0
@@ -117,3 +129,23 @@ class Character(pg.sprite.Sprite):
         self.max_hp -= item.vitality
         self.hp -= item.vitality
         self.strength -= item.strength
+
+    def draw_stats(self):
+        x_margin = 10
+        y_margin = 10
+        font_size = 32
+        font = pg.font.Font(dogica_path, font_size)
+
+        # vitality
+        text = font.render(f"Vitality: {self.max_hp}", True, (200, 200, 200))
+        textpos = text.get_rect(
+            x=x_margin, centery=self.screen.get_height() - font_size * 2 - y_margin
+        )
+        self.screen.blit(text, textpos)
+
+        # strength
+        text = font.render(f"Strength: {self.strength}", True, (200, 200, 200))
+        textpos = text.get_rect(
+            x=x_margin, centery=self.screen.get_height() - font_size / 2 - y_margin
+        )
+        self.screen.blit(text, textpos)

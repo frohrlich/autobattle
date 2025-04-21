@@ -91,7 +91,8 @@ def main():
         if not battle.is_started and not ended:
             start_battle_button.process()
         for character in battle.character_list:
-            character.draw_health_bar(screen)
+            character.draw_health_bar()
+        player.draw_stats()
         inventory.draw()
 
         if battle.has_ended():
@@ -179,6 +180,7 @@ def initialize_inventory(spritesheet, screen, player):
 def create_character(screen, spritesheet, character_type, is_ally, position):
     character_info = get_character_info(character_type)
     return Character(
+        screen,
         spritesheet,
         character_info.sprite,
         position,
