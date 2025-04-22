@@ -15,6 +15,7 @@ from data.data import get_random_item_identifier_by_quality
 from inventory import Inventory
 from inventory import Item
 from inventory import Slot
+from store import Store
 from utils.button import Button
 from utils.spritesheet import Spritesheet
 from utils.utils import NEXT_TURN_EVENT
@@ -56,6 +57,8 @@ def main():
         enemy_position,
     )
     inventory = initialize_inventory(spritesheet, screen, player)
+    store = Store(screen, spritesheet, inventory)
+    store.refurnish()
     battle = Battle([player, current_enemy])
     start_battle_button = create_start_battle_button(screen, battle)
 
@@ -71,16 +74,27 @@ def main():
             elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 sys.exit()
             elif event.type == pg.MOUSEBUTTONUP:
-                inventory.shop_button.click(event.pos)
-                if not battle.is_started:
-                    start_battle_button.click(event.pos)
-                inventory.drop_dragged_item(event.pos)
+                inventory.store_button.click(event.pos)
+                if not inventory.is_store_activated:
+                    if not battle.is_started:
+                        start_battle_button.click(event.pos)
+                    inventory.drop_dragged_item(event.pos)
+                else:
+                    store.buy_button.click(event.pos)
+                    store.drop_dragged_item()
+
             elif event.type == pg.MOUSEBUTTONDOWN:
-                if not battle.is_started:
-                    inventory.drag_item(event.pos)
+                if not inventory.is_store_activated:
+                    if not battle.is_started:
+                        inventory.drag_item(event.pos)
+                else:
+                    store.drag_item(event.pos)
             elif event.type == pg.MOUSEMOTION:
-                if not battle.is_started:
-                    inventory.move_dragged_item(event.rel)
+                if not inventory.is_store_activated:
+                    if not battle.is_started:
+                        inventory.move_dragged_item(event.rel)
+                else:
+                    store.move_dragged_item(event.rel)
             elif event.type == NEXT_TURN_EVENT:
                 battle.next_turn()
 
@@ -95,12 +109,15 @@ def main():
             character.draw_health_bar()
         player.draw_stats()
         inventory.draw()
+        if inventory.is_store_activated:
+            store.draw()
 
         if battle.has_ended():
             battle.stop()
             if not ended and battle.is_won():
                 score += 1
                 drop_random_item(spritesheet, inventory)
+                store.refurnish()
                 current_enemy = create_enemy(
                     screen,
                     spritesheet,

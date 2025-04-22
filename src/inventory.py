@@ -3,7 +3,7 @@ import pygame as pg
 from data.data import ItemType
 from data.data import Quality
 from data.data import get_item_info
-from data.data import get_price_by_quality
+from data.data import get_sell_price_by_quality
 from utils.button import Button
 from utils.utils import dogica_bold_path
 from utils.utils import dogica_path
@@ -25,6 +25,7 @@ class Item(pg.sprite.Sprite):
         self.strength = self.item_info.strength
         self.vitality = self.item_info.vitality
         self.health_bonus = self.item_info.health_bonus
+        self.name = self.item_info.name
 
         image, rect = spritesheet.image_at_index(self.sprite)
 
@@ -91,7 +92,7 @@ class Item(pg.sprite.Sprite):
         text_type_rect.left = self.rect.right + margin_x
         height += text_type_rect.height + margin_y
         # name
-        text_name = font_bold.render(self.item_info.name, True, text_name_color)
+        text_name = font_bold.render(self.name, True, text_name_color)
         text_name_rect = text_name.get_rect()
         width = max(width, text_name_rect.width)
         text_name_rect.bottom = self.rect.top - height
@@ -175,10 +176,11 @@ class Inventory:
         self.screen = screen
         self.player = player
         self.gold = 0
+        self.is_store_activated = False
         self.items = pg.sprite.RenderPlain(args)
         self.slots = slots
         self.dragged_item = None
-        self.create_shop_button()
+        self.create_store_button()
         self.refresh_item_positions()
 
     def add_item(self, item):
@@ -195,13 +197,13 @@ class Inventory:
 
         self.items.draw(self.screen)
 
-        self.shop_button.process()
+        self.store_button.process()
 
         if self.dragged_item:
-            self.shop_button.change_text("Sell!")
+            self.store_button.change_text("Sell!")
             self.screen.blit(self.dragged_item.image, self.dragged_item.rect)
-        else:
-            self.shop_button.change_text("Shop")
+        elif not self.is_store_activated:
+            self.store_button.change_text("Store")
 
         self.draw_gold()
 
@@ -214,6 +216,7 @@ class Inventory:
         for item in self.items.sprites():
             if item.rect.collidepoint(pos):
                 self.dragged_item = item
+                self.store_button.on_click_function = self.sell_item
 
     def drop_dragged_item(self, pos):
         """Drop a dragged item.
@@ -243,6 +246,7 @@ class Inventory:
                         break
             self.dragged_item = None
             self.refresh_item_positions()
+            self.store_button.on_click_function = self.open_store
 
     def move_dragged_item(self, rel):
         if self.dragged_item is not None:
@@ -256,10 +260,10 @@ class Inventory:
         margin = 10
 
         box_size = image_size + margin
-        self.base_x = self.screen.get_width() / 2 + 20 + (index % 8) * box_size
+        base_x = self.screen.get_width() / 2 + 20 + (index % 8) * box_size
         base_y = self.screen.get_height() / 2 + (index // 8 + 1) * box_size
         item.rect = pg.Rect(
-            self.base_x,
+            base_x,
             base_y,
             image_size,
             image_size,
@@ -290,19 +294,19 @@ class Inventory:
         self.player.add_item(item)
         slot.item = item
 
-    def create_shop_button(self):
+    def create_store_button(self):
         margin = 10
         height = 80
-        width = 100
-        self.shop_button = Button(
+        width = 115
+        self.store_button = Button(
             self.screen,
             self.screen.get_width() - width / 2 - margin,
             self.screen.get_height() - height / 2 - margin,
             width,
             height,
             24,
-            "Shop",
-            self.sell_item,
+            "Store",
+            self.open_store,
             {
                 "normal": "#aaa200",
                 "hover": "#666400",
@@ -312,9 +316,10 @@ class Inventory:
 
     def sell_item(self):
         if self.dragged_item:
-            self.gold += get_price_by_quality(self.dragged_item.quality)
+            self.gold += get_sell_price_by_quality(self.dragged_item.quality)
             self.remove_item(self.dragged_item)
             self.dragged_item = None
+            self.store_button.on_click_function = self.open_store
 
     def draw_gold(self):
         margin = 8
@@ -328,8 +333,8 @@ class Inventory:
         gold_image = pg.transform.scale(gold_image, size)
         gold_rect = gold_image.get_rect()
 
-        gold_rect.right = self.shop_button.rect.left - margin
-        gold_rect.centery = self.shop_button.centery
+        gold_rect.right = self.store_button.rect.left - margin
+        gold_rect.centery = self.store_button.centery
         self.screen.blit(gold_image, gold_rect)
 
         font = pg.font.Font(dogica_path, 24)
@@ -339,6 +344,16 @@ class Inventory:
             centery=gold_rect.centery,
         )
         self.screen.blit(text, textpos)
+
+    def open_store(self):
+        self.is_store_activated = True
+        self.store_button.change_text("Exit")
+        self.store_button.on_click_function = self.close_store
+
+    def close_store(self):
+        self.is_store_activated = False
+        self.store_button.change_text("Store")
+        self.store_button.on_click_function = self.open_store
 
 
 class Slot:

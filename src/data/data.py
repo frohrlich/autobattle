@@ -24,11 +24,17 @@ drop_rates = {
     "RARE": 10,
     "EPIC": 5,
 }
-prices = {
+sell_prices = {
     "COMMON": 2,
     "UNCOMMON": 10,
     "RARE": 30,
     "EPIC": 100,
+}
+buy_prices = {
+    "COMMON": 3,
+    "UNCOMMON": 15,
+    "RARE": 45,
+    "EPIC": 150,
 }
 character_infos = {
     "ARCHER": {"name": "Archer", "sprite": (0, 3), "vitality": 150, "strength": 20},
@@ -224,6 +230,10 @@ def get_character_info(identifier):
     )
 
 
+def get_random_item_identifier():
+    return random.choice(list(item_infos.keys()))
+
+
 def get_random_item_identifier_by_quality(quality):
     identifiers = []
     for key, value in item_infos.items():
@@ -241,8 +251,15 @@ def get_drop_rate_by_quality(quality):
     return None
 
 
-def get_price_by_quality(quality):
-    for key, value in prices.items():
+def get_sell_price_by_quality(quality):
+    for key, value in sell_prices.items():
+        if key == quality.name:
+            return value
+    return None
+
+
+def get_buy_price_by_quality(quality):
+    for key, value in buy_prices.items():
         if key == quality.name:
             return value
     return None

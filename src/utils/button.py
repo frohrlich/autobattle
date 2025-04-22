@@ -29,6 +29,7 @@ class Button:
         self.width = width
         self.height = height
         self.on_click_function = on_click_function
+        self.text_str = text
 
         self.fill_colors = fill_colors
 
@@ -65,8 +66,13 @@ class Button:
         )
 
     def click(self, pos):
-        if self.rect.collidepoint(pos):
+        if self.on_click_function and self.rect.collidepoint(pos):
             self.on_click_function()
 
     def change_text(self, text):
+        self.text_str = text
         self.text = self.font.render(text, True, (0, 0, 0))
+
+    def change_font_size(self, font_size):
+        self.font = pg.font.Font(dogica_path, font_size)
+        self.text = self.font.render(self.text_str, True, (0, 0, 0))
