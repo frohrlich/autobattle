@@ -189,6 +189,8 @@ class Inventory:
 
     def remove_item(self, item):
         self.items.remove(item)
+        if slot := next((slot for slot in self.slots if slot.item == item), None):
+            slot.item = None
         self.refresh_item_positions()
 
     def draw(self):
