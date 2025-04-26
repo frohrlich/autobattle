@@ -46,7 +46,7 @@ def main():
     )
     # the enemies we will have to fight in successive battles
     enemy_types = ("PIG", "WASP", "GHOST")
-    # initialize first battle between our player and the first enemy of the list
+    # initialize first battle
     score = 0
     enemy_position = (screen.get_width() * 3 / 8, screen.get_height() / 2)
     current_enemy = create_character(
